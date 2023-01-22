@@ -1,0 +1,50 @@
+{
+    "2019": [
+        {
+            "name": "sycamore",
+            "adresse": "https://www.google.com/maps/@46.0486968,14.5123516,3a,75y,129.41h,120.6t/data=!3m6!1e1!3m4!1s7eJuEOIrvcDQGngCp5Yp3w!2e0!7i16384!8i8192",
+            "icon": "tree1",
+            "iconinactive": "tree1inactive",
+            "coords": [
+                46.048655,
+                14.512620
+            ]
+        }
+    ],
+    "2020": [
+        {
+            "name": "weeping_beech",
+            "adresse": "https://www.google.com/maps/@46.0684739,14.4843797,3a,75y,238.39h,104.88t/data=!3m6!1e1!3m4!1sysrrkqFzrRtRcCtr5vhO4g!2e0!7i16384!8i8192",
+            "icon": "tree2",
+            "iconinactive": "tree2inactive",
+            "coords": [
+                46.068336,
+                14.4818255
+            ]
+        }
+    ],
+    "2021": [
+        {
+            "name": "Caucasian_wingnut",
+            "adresse": " https://www.google.com/maps/@46.0658355,14.5226392,3a,75y,157.1h,93.77t/data=!3m6!1e1!3m4!1sQwu5V1rghFnR_LVI3rNo0g!2e0!7i13312!8i6656",
+            "icon": "tree1",
+            "iconinactive": "tree1inactive",
+            "coords": [
+                46.065707,
+                14.522730
+            ]
+        }
+    ],
+    "2022": [
+        {
+            "name": "Persian_ironwood",
+            "adresse": "https://www.google.com/maps/@46.0547353,14.5255121,3a,48.5y,192.18h,103.69t/data=!3m6!1e1!3m4!1sBUYTFQoVuBUqFNypnQ-apQ!2e0!7i16384!8i8192",
+            "icon": "tree3",
+            "iconinactive": "tree3inactive",
+            "coords": [
+                46.054561,
+                14.525500
+            ]
+        }
+    ]
+}
