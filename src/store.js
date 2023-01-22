@@ -82,7 +82,7 @@ export function Text({ tid, classLink }) {
             if (regexLink.test(match)) {
                 const [, link, text] = match.match(regexLink);
                 replaced = ReactStringReplace(replaced, match, () => {
-                    return <a className={classLink} href={link}>{text}</a>
+                    return <a target="blank" className={classLink} href={link}>{text}</a>
                 });
             };
             if (regexBr.test(match)) {
