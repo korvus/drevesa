@@ -76,9 +76,9 @@ const Col = () => {
             <div className="pannel">
                 <LanguageSelector />
 
-                <h1>
+                <h1 onClick={() => { setModalContent('about'); if (!dm) setDm(true) }}>
                     <Text tid="titre" />
-                    <span className="about" onClick={() => { setModalContent('about'); if (!dm) setDm(true) }}>?</span>
+                    <span className="about">?</span>
                 </h1>
                 <div className="content">
                     <ListByYears actions={[setYearselected, yearselected, mapData]} hover={setTmppins} markerRef={markerRef} />

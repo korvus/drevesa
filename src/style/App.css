@@ -68,8 +68,8 @@ a {
 }
 
 .about {
-  color: #666;
-  border: 3px solid #999;
+  color: #1a78ff;
+  border: 3px solid #1a78ff;
   border-radius: 50%;
   display: inline-block;
   width: 20px;
@@ -81,7 +81,9 @@ a {
 }
 
 .about:hover {
-  background: #ccc;
+  background: #fff;
+  color: #81fda0;
+  border: 3px solid #81fda0;
 }
 
 .warning {
@@ -214,10 +216,11 @@ a {
   text-decoration: none;
 }
 
-.pannel h1,
-.pannel h2 {
+.pannel h1 {
   font-size: 2rem;
   margin: 2rem 0;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .pannel p {
@@ -377,8 +380,8 @@ a {
   }
 
   .about {
-    color: #666;
-    border: 2px solid #999;
+    color: #1a78ff;
+    border: 2px solid #1a78ff;
     border-radius: 50%;
     width: 15px;
     line-height: 15px;
