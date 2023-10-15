@@ -1,3 +1,4 @@
+
 import {
     MapContainer,
     TileLayer,
@@ -11,9 +12,8 @@ import "leaflet/dist/leaflet.css";
 import Modalcontent from './modal.js';
 import coords from '../datas/datas.json';
 import sources from '../datas/roots.json';
-import Warningcontent from './warning.js';
 import { PinContext, Text } from '../store';
-import React, { useEffect, useRef, useContext, useState } from "react";
+import React, { useEffect, useRef, useContext, useState, useCallback } from "react";
 import { TreeTwo, TreeThree, IconDefault, TreeOneInactive, TreeTwoInactive, TreeThreeInactive } from '../components/icon.js';
 
 const Ljubljana = [46.0507666, 14.5047565];
@@ -177,12 +177,23 @@ function ListMarkers(props) {
 }
 
 
+function MapInitializer({ setMapInstance }) {
+    const map = useMap();
+
+    useEffect(() => {
+        setMapInstance(map);
+    }, [map, setMapInstance]);
+
+    return null; // ce composant n'a pas besoin de rendre quoi que ce soit visuellement
+}
+
 const Map = () => {
     const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds } = useContext(PinContext);
 
     const [divHeight, setDivHeight] = useState(0);
     const markerRef = useRef([]);
     const appRef = useRef(null);
+
 
     useEffect(() => {
         if (markerRef && markerRef.current) {
@@ -199,17 +210,16 @@ const Map = () => {
     }, [markerRef, yearselected]);
 
 
+    const handleResize = useCallback(() => {
+        setDivWidth(appRef.current.clientWidth);
+        setDivHeight(appRef.current.clientHeight);
+    }, [setDivWidth]);
 
     useEffect(() => {
         setDivWidth(appRef.current.clientWidth);
         setDivHeight(appRef.current.clientHeight);
         return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    function handleResize() {
-        setDivWidth(appRef.current.clientWidth);
-        setDivHeight(appRef.current.clientHeight);
-    }
+    }, [handleResize, setDivWidth]);
 
     return (
         <div className="App">
@@ -221,17 +231,13 @@ const Map = () => {
                         <Modalcontent />
                     </div>
                 }
-                <MapContainer
-                    center={Ljubljana}
-                    zoom={13}
-                    scrollWheelZoom={false}
-                    tap={false}
-                    ref={mapData.setMapObj}
-                >
+                <MapContainer center={Ljubljana} zoom={13} scrollWheelZoom={false} tap={false}>
                     <TileLayer
                         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
+                    <MapInitializer setMapInstance={mapData.setMapObj} />
+
                     <ListMarkers hover={tmppins} warning={setWarning} askedyear={yearselected} markerRef={markerRef} userLanguage={userLanguage} />
 
                 </MapContainer>

@@ -8,9 +8,7 @@ const listDate = Object.keys(trees);
 
 const ListByYears = (props) => {
     const [setYearselected, yearselected, mapData] = props.actions;
-    const { divWidth } = useContext(PinContext);
     // const width = props.device;
-    console.log("divWidth", divWidth);
     const setTmppins = props.hover;
 
 
@@ -90,18 +88,20 @@ const Col = () => {
                 </div>
 
             </div>
-            <div className="containerCircles">
-                {circles.map((circle, index) => (
-                    <div
-                        key={index}
-                        className="circle"
-                        style={{
-                            width: circle.size,
-                            height: circle.size,
-                            borderRadius: `50%`,
-                        }}
-                    />
-                ))}
+            <div className="containerDeco">
+                <div className="containerCircles">
+                    {circles.map((circle, index) => (
+                        <div
+                            key={index}
+                            className="circle"
+                            style={{
+                                width: circle.size,
+                                height: circle.size,
+                                borderRadius: `50%`,
+                            }}
+                        />
+                    ))}
+                </div>
             </div>
         </>
     );

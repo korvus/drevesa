@@ -169,15 +169,21 @@ a {
   flex-grow: 1;
 }
 
+.containerDeco {
+  position: absolute;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+  left: 285px;
+  width: 40px;
+}
+
 .containerCircles {
   display: flex;
   position: absolute;
-  height: 100%;
   overflow: hidden;
   align-items: center;
   flex-direction: column;
-  left: calc(240px + 30px + 15px);
-  flex-wrap: wrap;
   z-index: 1;
 }
 
