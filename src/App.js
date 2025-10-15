@@ -1,4 +1,4 @@
-﻿import './style/App.css';
+import './style/App.css';
 import './style/leaflet.css';
 import Col from './components/menu.js';
 import Map from './components/map.js';

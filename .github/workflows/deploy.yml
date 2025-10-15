@@ -8,6 +8,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      CI: false
 
     steps:
       - name: Checkout code
@@ -19,6 +21,8 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies and build
+        env:
+          CI: false
         run: |
           npm ci
           npm run build

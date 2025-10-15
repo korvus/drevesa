@@ -1,4 +1,4 @@
-﻿import React, { useContext } from 'react';
+import React, { useContext } from 'react';
 import { PinContext, Text } from '../store';
 import tshirt from '../img/tshirt.png';
 

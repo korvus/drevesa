@@ -1,4 +1,4 @@
-﻿import { useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { PinContext } from '../store';
 
 const LOCALE_MAP = {
