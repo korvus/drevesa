@@ -1,3 +1,35 @@
+.tshirtPromo {
+  position: fixed;
+  right: 2.4rem;
+  bottom: 2.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  max-width: 320px;
+  z-index: 1200;
+}
+
+.tshirtPromo__text {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #737473;
+  background-color: #add19e;
+  padding: 1rem;
+  border-radius: 10px;
+  padding-right: 50px;
+  line-height: 1.35;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.tshirtPromo img {
+  position: absolute;
+  top: -50px;
+  right: -20px;
+  width: 96px;
+  height: auto;
+  display: block;
+}
+
 #root {
   display: flex;
   height: 100%;
@@ -268,6 +300,18 @@ a {
   background: #178040;
 }
 
+.pannel .badgeWrapper {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 16px;
+}
+
+.pannel .badgeWrapper img {
+  width: 100%;
+  max-width: 140px;
+  height: auto;
+}
+
 .pannel .menu {
   display: flex;
   margin-bottom: 20px;
@@ -372,6 +416,10 @@ a {
     margin-top: 20px;
   }
 
+  .pannel .badgeWrapper {
+    display: none;
+  }
+
   .langues {
     order: 4;
   }
@@ -394,5 +442,11 @@ a {
     height: 15px;
     margin-left: 8px;
     font-size: 15px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .tshirtPromo {
+    display: none;
   }
 }

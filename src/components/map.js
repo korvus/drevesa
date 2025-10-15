@@ -13,8 +13,8 @@ import Modalcontent from './modal.js';
 import coords from '../datas/datas.json';
 import sources from '../datas/roots.json';
 import { PinContext, Text } from '../store';
-import React, { useEffect, useRef, useContext, useState, useCallback } from "react";
-import { TreeTwo, TreeThree, IconDefault, TreeOneInactive, TreeTwoInactive, TreeThreeInactive } from '../components/icon.js';
+import { useEffect, useRef, useContext, useState, useCallback } from "react";
+import { getIcon } from '../components/icon.js';
 
 const Ljubljana = [46.0507666, 14.5047565];
 
@@ -29,12 +29,7 @@ function constructJsx(trees, map, markerRef, userLanguage) {
         const title = trees[tree].popup[0];
 
         if (trees.hasOwnProperty(tree)) {
-            let icone = IconDefault;
-            if (trees[tree].icon === "tree2") icone = TreeTwo
-            if (trees[tree].icon === "tree3") icone = TreeThree
-            if (trees[tree].icon === "tree1inactive") icone = TreeOneInactive
-            if (trees[tree].icon === "tree2inactive") icone = TreeTwoInactive
-            if (trees[tree].icon === "tree3inactive") icone = TreeThreeInactive
+            const icone = getIcon(trees[tree].icon);
 
             if (map.getBounds().contains(trees[tree].coords)) { shouldBeOneAtLeast++ };
 

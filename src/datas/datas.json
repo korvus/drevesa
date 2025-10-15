@@ -7,7 +7,7 @@
             "iconinactive": "tree1inactive",
             "coords": [
                 46.048655,
-                14.512620
+                14.51262
             ]
         }
     ],
@@ -31,7 +31,7 @@
             "iconinactive": "tree1inactive",
             "coords": [
                 46.065707,
-                14.522730
+                14.52273
             ]
         }
     ],
@@ -43,7 +43,31 @@
             "iconinactive": "tree3inactive",
             "coords": [
                 46.054561,
-                14.525500
+                14.5255
+            ]
+        }
+    ],
+    "2023": [
+        {
+            "name": "Aljaževa ulica",
+            "adresse": "https://www.google.com/maps/place/Alja%C5%BEeva+ulica,+1000+Ljubljana/@46.0688015,14.4918455,17z/data=!4m15!1m8!3m7!1s0x476532ba44fc37a3:0xcddc83438c5e8b62!2sAlja%C5%BEeva+ulica,+1000+Ljubljana!3b1!8m2!3d46.0679436!4d14.4950909!16s%2Fg%2F122kznq1!3m5!1s0x476532ba44fc37a3:0xcddc83438c5e8b62!8m2!3d46.0679436!4d14.4950909!16s%2Fg%2F122kznq1?entry=ttu&g_ep=EgoyMDI1MTAxMi4wIKXMDSoASAFQAw%3D%3D",
+            "icon": "tree4",
+            "iconinactive": "tree4inactive",
+            "coords": [
+                46.06809430764765,
+                14.495091021487566
+            ]
+        }
+    ],
+    "2024": [
+        {
+            "name": "ginkgo",
+            "adresse": "https://www.google.com/maps/@46.0520805,14.5003385,21z",
+            "icon": "tree5",
+            "iconinactive": "tree5inactive",
+            "coords": [
+                46.0520805,
+                14.5003385
             ]
         }
     ]
