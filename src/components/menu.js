@@ -2,6 +2,7 @@ import React, { useContext, useCallback, useState, useEffect } from "react";
 import trees from "../datas/datas.json";
 import { PinContext, Text } from "../store";
 import LanguageSelector from './languageSelector.js';
+import badge from '../img/badge.png';
 
 
 const listDate = Object.keys(trees);
@@ -78,9 +79,15 @@ const Col = () => {
                     <Text tid="titre" />
                     <span className="about">?</span>
                 </h1>
+
+                <div className="badgeWrapper">
+                    <img src={badge} alt="Ljubljana tree badge" />
+                </div>
+
                 <div className="content">
                     <ListByYears actions={[setYearselected, yearselected, mapData]} hover={setTmppins} markerRef={markerRef} />
                 </div>
+
 
                 <div className="menu">
                     <span onClick={() => { setModalContent('contact'); if (!dm) setDm(true) }}><Text tid="contact" /></span>
