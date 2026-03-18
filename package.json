@@ -13,11 +13,24 @@
     "react-string-replace": "^1.1.0",
     "web-vitals": "^3.0.4"
   },
+  "devDependencies": {
+    "react-snap": "^1.23.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "postbuild": "react-snap",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "reactSnap": {
+    "include": [
+      "/",
+      "/fr",
+      "/en",
+      "/sl"
+    ],
+    "skipThirdPartyRequests": true
   },
   "eslintConfig": {
     "extends": [
@@ -36,5 +49,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "react-snap": "^1.23.0"
   }
 }
