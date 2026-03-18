@@ -1,15 +1,41 @@
-import React, { useState, createContext, useRef, useContext } from "react";
+import React, { useState, createContext, useRef, useContext, useEffect } from "react";
 import { languageOptions, dictionaryList } from './datas/languages.js';
 import ReactStringReplace from 'react-string-replace';
 
 export const PinContext = createContext(null);
 
+const LANGUAGE_FALLBACK = 'fr';
+const LANGUAGE_ALIASES = {
+    si: 'sl'
+};
+
+function normalizeLanguage(language) {
+    const sanitizedLanguage = LANGUAGE_ALIASES[language] || language;
+    return languageOptions[sanitizedLanguage] ? sanitizedLanguage : null;
+}
+
+export function getLanguageFromPathname(pathname) {
+    const firstSegment = pathname.split('/').filter(Boolean)[0];
+    return normalizeLanguage(firstSegment);
+}
+
+export function getLanguagePath(language) {
+    return `/${language}`;
+}
+
 export function getCurrentLanguage() {
-    let defaultLanguage = window.localStorage.getItem('ljb-lang');
-    if (!defaultLanguage) {
-        defaultLanguage = window.navigator.language.substring(0, 2);
+    const languageFromPath = getLanguageFromPathname(window.location.pathname);
+    if (languageFromPath) {
+        return languageFromPath;
     }
-    return defaultLanguage;
+
+    const storedLanguage = normalizeLanguage(window.localStorage.getItem('ljb-lang'));
+    if (storedLanguage) {
+        return storedLanguage;
+    }
+
+    const browserLanguage = normalizeLanguage(window.navigator.language.substring(0, 2));
+    return browserLanguage || LANGUAGE_FALLBACK;
 }
 
 export const PinContextProvider = props => {
@@ -21,8 +47,11 @@ export const PinContextProvider = props => {
     const [warning, setWarning] = useState(false);
     const [tmppins, setTmppins] = useState(0);
     const [showClouds, setShowClouds] = useState(false);
-    const [userLanguage, setUserLanguage] = useState('fr');
+    const [userLanguage, setUserLanguage] = useState(getCurrentLanguage);
     const [divWidth, setDivWidth] = useState(0);
+    const [userPosition, setUserPosition] = useState(null);
+    const [routeToTree, setRouteToTree] = useState([]);
+    const [routeMeta, setRouteMeta] = useState(null);
 
     const [mapObj, setMapObj] = useState(null);
     const goToArea = (regionCoord, zoom = 13) => {
@@ -37,6 +66,29 @@ export const PinContextProvider = props => {
         goToArea: goToArea
     }
 
+    useEffect(() => {
+        const currentPath = window.location.pathname;
+        const currentLanguagePath = getLanguagePath(userLanguage);
+        const normalizedPath = currentPath === '/si' || currentPath === '/si/' ? '/sl' : currentPath;
+
+        if (normalizedPath !== currentLanguagePath && normalizedPath !== `${currentLanguagePath}/`) {
+            window.history.replaceState({}, '', currentLanguagePath);
+        } else if (currentPath !== normalizedPath) {
+            window.history.replaceState({}, '', normalizedPath);
+        }
+
+        window.localStorage.setItem('ljb-lang', userLanguage);
+    }, [userLanguage]);
+
+    useEffect(() => {
+        const handlePopState = () => {
+            setUserLanguage(getCurrentLanguage());
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
     const provider = {
         dm,
         setDm,
@@ -46,6 +98,9 @@ export const PinContextProvider = props => {
         goToArea,
         setWarning,
         userLanguage,
+        userPosition, setUserPosition,
+        routeToTree, setRouteToTree,
+        routeMeta, setRouteMeta,
         tmppins, setTmppins,
         divWidth, setDivWidth,
         showClouds, setShowClouds,
@@ -53,9 +108,10 @@ export const PinContextProvider = props => {
         yearselected, setYearselected,
         dictionary: dictionaryList[userLanguage],
         userLanguageChange: selected => {
-            const newLanguage = languageOptions[selected] ? selected : 'fr'
+            const newLanguage = normalizeLanguage(selected) || LANGUAGE_FALLBACK;
             setUserLanguage(newLanguage);
             window.localStorage.setItem('ljb-lang', newLanguage);
+            window.history.pushState({}, '', getLanguagePath(newLanguage));
         }
     };
 

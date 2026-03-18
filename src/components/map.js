@@ -5,7 +5,9 @@ import {
     useMap,
     useMapEvent,
     Popup,
-    Marker
+    Marker,
+    CircleMarker,
+    Polyline
 } from "react-leaflet";
 import Cloud from './cloud.js';
 import "leaflet/dist/leaflet.css";
@@ -183,7 +185,7 @@ function MapInitializer({ setMapInstance }) {
 }
 
 const Map = () => {
-    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds } = useContext(PinContext);
+    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, userPosition, routeToTree, dictionary } = useContext(PinContext);
 
     const [divHeight, setDivHeight] = useState(0);
     const markerRef = useRef([]);
@@ -234,6 +236,33 @@ const Map = () => {
                     <MapInitializer setMapInstance={mapData.setMapObj} />
 
                     <ListMarkers hover={tmppins} warning={setWarning} askedyear={yearselected} markerRef={markerRef} userLanguage={userLanguage} />
+                    {userPosition && (
+                        <CircleMarker
+                            center={userPosition}
+                            radius={9}
+                            pathOptions={{
+                                color: '#0f5d2f',
+                                fillColor: '#178040',
+                                fillOpacity: 1,
+                                weight: 3
+                            }}
+                        >
+                            <Popup>{dictionary.nearestTreeYouAreHere || 'You are here'}</Popup>
+                        </CircleMarker>
+                    )}
+                    {routeToTree.length > 0 && (
+                        <Polyline
+                            positions={routeToTree}
+                            pathOptions={{
+                                color: '#178040',
+                                weight: 5,
+                                opacity: 0.85,
+                                lineCap: 'round',
+                                lineJoin: 'round',
+                                dashArray: '10 8'
+                            }}
+                        />
+                    )}
 
                 </MapContainer>
             </div>

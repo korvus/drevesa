@@ -1,9 +1,20 @@
 {
-    "redirects": [
+    "rewrites": [
         {
-            "source": "/(.*)",
-            "destination": "https://drevesa.200.work",
-            "permanent": true
+            "source": "/fr",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/en",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/sl",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/si",
+            "destination": "/index.html"
         }
     ]
 }

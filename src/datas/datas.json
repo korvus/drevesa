@@ -2,7 +2,7 @@
     "2019": [
         {
             "name": "sycamore",
-            "adresse": "https://www.google.com/maps/@46.0486968,14.5123516,3a,75y,129.41h,120.6t/data=!3m6!1e1!3m4!1s7eJuEOIrvcDQGngCp5Yp3w!2e0!7i16384!8i8192",
+            "adresse": "https://www.google.com/maps/@46.0485635,14.512528,3a,75y,23.21h,110.13t/data=!3m7!1e1!3m5!1sBZJ_A41SlO2TgsL6CzRI3A!2e0!6shttps:%2F%2Fstreetviewpixels-pa.googleapis.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D-20.129440442823622%26panoid%3DBZJ_A41SlO2TgsL6CzRI3A%26yaw%3D23.20830350160044!7i16384!8i8192?entry=ttu&g_ep=EgoyMDI2MDMxNS4wIKXMDSoASAFQAw%3D%3D",
             "icon": "tree1",
             "iconinactive": "tree1inactive",
             "coords": [
@@ -49,7 +49,7 @@
     ],
     "2023": [
         {
-            "name": "Aljaževa ulica",
+            "name": "Japanese_cherries",
             "adresse": "https://www.google.com/maps/place/Alja%C5%BEeva+ulica,+1000+Ljubljana/@46.0688015,14.4918455,17z/data=!4m15!1m8!3m7!1s0x476532ba44fc37a3:0xcddc83438c5e8b62!2sAlja%C5%BEeva+ulica,+1000+Ljubljana!3b1!8m2!3d46.0679436!4d14.4950909!16s%2Fg%2F122kznq1!3m5!1s0x476532ba44fc37a3:0xcddc83438c5e8b62!8m2!3d46.0679436!4d14.4950909!16s%2Fg%2F122kznq1?entry=ttu&g_ep=EgoyMDI1MTAxMi4wIKXMDSoASAFQAw%3D%3D",
             "icon": "tree4",
             "iconinactive": "tree4inactive",

@@ -70,6 +70,18 @@ a {
   color: #b27c69;
 }
 
+@media screen and (min-width: 993px) {
+  ::selection {
+    background: #8d4a3a;
+    color: #fff6ef;
+  }
+
+  ::-moz-selection {
+    background: #8d4a3a;
+    color: #fff6ef;
+  }
+}
+
 .unexistant {
   display: block;
   color: #f00;
@@ -203,6 +215,54 @@ a {
 
 .content {
   flex-grow: 1;
+}
+
+.nearestTreeCard {
+  margin-top: 2rem;
+  padding: 1.4rem;
+  background: rgba(173, 209, 158, 0.28);
+  border: 1px solid rgba(23, 128, 64, 0.22);
+  border-radius: 12px;
+}
+
+.nearestTreeButton {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 1.1rem 1.2rem;
+  background: #178040;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.nearestTreeButton:hover {
+  background: #116533;
+  transform: translateY(-1px);
+}
+
+.nearestTreeStatus {
+  margin: 1.2rem 0 0;
+  font-size: 1.4rem;
+  line-height: 1.45;
+  color: #245233;
+}
+
+.nearestTreeResult strong {
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.nearestTreeResult p {
+  margin: 0.4rem 0 0;
+  font-size: 1.4rem;
+}
+
+.nearestTreeMeta {
+  font-size: 0.82em;
+  opacity: 0.9;
 }
 
 .containerDeco {

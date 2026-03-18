@@ -51,6 +51,14 @@ const Modalcontent = () => {
                         </div>
                     </>
                 }
+                {modalContent === "tooFar" &&
+                    <>
+                        <h2><Text tid="nearestTreeTooFarTitle" /></h2>
+                        <div>
+                            <Text tid="nearestTreeTooFar" />
+                        </div>
+                    </>
+                }
             </div>
         </div>
     );

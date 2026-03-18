@@ -13,8 +13,14 @@ const OG_LOCALE_MAP = {
   sl: 'sl_SI'
 };
 
-const CANONICAL_URL = 'https://drevesa.200.org/';
-const SHARE_IMAGE_URL = `${CANONICAL_URL}logo512.png`;
+const CANONICAL_BASE_URL = 'https://drevesa.200.org';
+const SHARE_IMAGE_URL = `${CANONICAL_BASE_URL}/preview.png`;
+const SHARE_IMAGE_WIDTH = '1200';
+const SHARE_IMAGE_HEIGHT = '630';
+
+function getLocalizedUrl(language) {
+  return `${CANONICAL_BASE_URL}/${language}`;
+}
 
 function upsertMeta(selector, attributes, content) {
   if (!content) return;
@@ -37,12 +43,24 @@ function upsertLink(rel, href) {
   link.setAttribute('href', href);
 }
 
+function upsertAlternateLink(hreflang, href) {
+  let link = document.head.querySelector(`link[rel="alternate"][hreflang="${hreflang}"]`);
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('rel', 'alternate');
+    link.setAttribute('hreflang', hreflang);
+    document.head.appendChild(link);
+  }
+  link.setAttribute('href', href);
+}
+
 const Seo = () => {
   const { dictionary = {}, userLanguage = 'en' } = useContext(PinContext);
 
   useEffect(() => {
     const lang = LOCALE_MAP[userLanguage] || 'en';
     const ogLocale = OG_LOCALE_MAP[userLanguage] || 'en_GB';
+    const localizedUrl = getLocalizedUrl(userLanguage);
 
     document.documentElement.setAttribute('lang', lang);
 
@@ -60,8 +78,10 @@ const Seo = () => {
     upsertMeta('meta[property="og:title"]', { property: 'og:title' }, ogTitle);
     upsertMeta('meta[property="og:description"]', { property: 'og:description' }, ogDescription);
     upsertMeta('meta[property="og:locale"]', { property: 'og:locale' }, ogLocale);
-    upsertMeta('meta[property="og:url"]', { property: 'og:url' }, CANONICAL_URL);
+    upsertMeta('meta[property="og:url"]', { property: 'og:url' }, localizedUrl);
     upsertMeta('meta[property="og:image"]', { property: 'og:image' }, SHARE_IMAGE_URL);
+    upsertMeta('meta[property="og:image:width"]', { property: 'og:image:width' }, SHARE_IMAGE_WIDTH);
+    upsertMeta('meta[property="og:image:height"]', { property: 'og:image:height' }, SHARE_IMAGE_HEIGHT);
     upsertMeta('meta[property="og:image:alt"]', { property: 'og:image:alt' }, imageAlt);
 
     upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title' }, ogTitle);
@@ -70,7 +90,11 @@ const Seo = () => {
     upsertMeta('meta[name="twitter:image:alt"]', { name: 'twitter:image:alt' }, imageAlt);
     upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card' }, 'summary_large_image');
 
-    upsertLink('canonical', CANONICAL_URL);
+    upsertLink('canonical', localizedUrl);
+    upsertAlternateLink('fr', getLocalizedUrl('fr'));
+    upsertAlternateLink('en', getLocalizedUrl('en'));
+    upsertAlternateLink('sl', getLocalizedUrl('sl'));
+    upsertAlternateLink('x-default', getLocalizedUrl('fr'));
   }, [dictionary, userLanguage]);
 
   return null;
