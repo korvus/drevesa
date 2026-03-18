@@ -13,7 +13,7 @@ const OG_LOCALE_MAP = {
   sl: 'sl_SI'
 };
 
-const CANONICAL_BASE_URL = 'https://drevesa.200.org';
+const CANONICAL_BASE_URL = 'https://drevesa.200.work';
 const SHARE_IMAGE_URL = `${CANONICAL_BASE_URL}/preview.png`;
 const SHARE_IMAGE_WIDTH = '1200';
 const SHARE_IMAGE_HEIGHT = '630';
@@ -54,6 +54,17 @@ function upsertAlternateLink(hreflang, href) {
   link.setAttribute('href', href);
 }
 
+function upsertJsonLd(content) {
+  let script = document.head.querySelector('script[data-drevesa-schema="website"]');
+  if (!script) {
+    script = document.createElement('script');
+    script.setAttribute('type', 'application/ld+json');
+    script.setAttribute('data-drevesa-schema', 'website');
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(content);
+}
+
 const Seo = () => {
   const { dictionary = {}, userLanguage = 'en' } = useContext(PinContext);
 
@@ -73,6 +84,7 @@ const Seo = () => {
     const ogDescription = dictionary.seoOgDescription || description;
     const keywords = dictionary.seoKeywords || 'Ljubljana tree of the year, Drevesa, Ljubljana trees map';
     const imageAlt = dictionary.seoImageAlt || "Illustration of Ljubljana's Tree of the Year badge";
+    const websiteName = 'Drevesa';
 
     document.title = title;
 
@@ -82,6 +94,7 @@ const Seo = () => {
     upsertMeta('meta[property="og:description"]', { property: 'og:description' }, ogDescription);
     upsertMeta('meta[property="og:locale"]', { property: 'og:locale' }, ogLocale);
     upsertMeta('meta[property="og:url"]', { property: 'og:url' }, localizedUrl);
+    upsertMeta('meta[property="og:site_name"]', { property: 'og:site_name' }, websiteName);
     upsertMeta('meta[property="og:image"]', { property: 'og:image' }, SHARE_IMAGE_URL);
     upsertMeta('meta[property="og:image:width"]', { property: 'og:image:width' }, SHARE_IMAGE_WIDTH);
     upsertMeta('meta[property="og:image:height"]', { property: 'og:image:height' }, SHARE_IMAGE_HEIGHT);
@@ -98,6 +111,20 @@ const Seo = () => {
     upsertAlternateLink('en', getLocalizedUrl('en'));
     upsertAlternateLink('sl', getLocalizedUrl('sl'));
     upsertAlternateLink('x-default', getLocalizedUrl('fr'));
+
+    upsertJsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: websiteName,
+      url: localizedUrl,
+      description,
+      inLanguage: [lang],
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://www.google.com/search?q=Drevesa+{search_term_string}',
+        'query-input': 'required name=search_term_string'
+      }
+    });
   }, [dictionary, userLanguage]);
 
   return null;
