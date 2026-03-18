@@ -30,7 +30,11 @@
       "/en",
       "/sl"
     ],
-    "skipThirdPartyRequests": true
+    "skipThirdPartyRequests": true,
+    "puppeteerArgs": [
+      "--no-sandbox",
+      "--disable-setuid-sandbox"
+    ]
   },
   "eslintConfig": {
     "extends": [
