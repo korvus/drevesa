@@ -29,11 +29,6 @@ export function getCurrentLanguage() {
         return languageFromPath;
     }
 
-    const storedLanguage = normalizeLanguage(window.localStorage.getItem('ljb-lang'));
-    if (storedLanguage) {
-        return storedLanguage;
-    }
-
     const browserLanguage = normalizeLanguage(window.navigator.language.substring(0, 2));
     return browserLanguage || LANGUAGE_FALLBACK;
 }
@@ -65,23 +60,40 @@ export const PinContextProvider = props => {
         setMapObj: setMapObj,
         goToArea: goToArea
     }
+    const pathnameLanguage = getLanguageFromPathname(window.location.pathname);
+    const activeLanguage = pathnameLanguage || userLanguage;
+
+    useEffect(() => {
+        if (!pathnameLanguage) {
+            return;
+        }
+
+        if (userLanguage !== pathnameLanguage) {
+            setUserLanguage(pathnameLanguage);
+        }
+    }, [pathnameLanguage, userLanguage]);
 
     useEffect(() => {
         const currentPath = window.location.pathname;
-        const currentLanguagePath = getLanguagePath(userLanguage);
+        const currentLanguagePath = getLanguagePath(activeLanguage);
         const normalizedPath = currentPath === '/si' || currentPath === '/si/' ? '/sl' : currentPath;
+        const hasLanguageInPath = Boolean(getLanguageFromPathname(normalizedPath));
 
-        if (normalizedPath !== currentLanguagePath && normalizedPath !== `${currentLanguagePath}/`) {
-            window.history.replaceState({}, '', currentLanguagePath);
-        } else if (currentPath !== normalizedPath) {
+        if (currentPath !== normalizedPath) {
             window.history.replaceState({}, '', normalizedPath);
+        } else if (!hasLanguageInPath && normalizedPath !== currentLanguagePath && normalizedPath !== `${currentLanguagePath}/`) {
+            window.history.replaceState({}, '', currentLanguagePath);
         }
-
-        window.localStorage.setItem('ljb-lang', userLanguage);
-    }, [userLanguage]);
+    }, [activeLanguage, pathnameLanguage]);
 
     useEffect(() => {
         const handlePopState = () => {
+            const languageFromPath = getLanguageFromPathname(window.location.pathname);
+            if (languageFromPath) {
+                setUserLanguage(languageFromPath);
+                return;
+            }
+
             setUserLanguage(getCurrentLanguage());
         };
 
@@ -97,7 +109,7 @@ export const PinContextProvider = props => {
         warning,
         goToArea,
         setWarning,
-        userLanguage,
+        userLanguage: activeLanguage,
         userPosition, setUserPosition,
         routeToTree, setRouteToTree,
         routeMeta, setRouteMeta,
@@ -106,11 +118,10 @@ export const PinContextProvider = props => {
         showClouds, setShowClouds,
         modalContent, setModalContent,
         yearselected, setYearselected,
-        dictionary: dictionaryList[userLanguage],
+        dictionary: dictionaryList[activeLanguage],
         userLanguageChange: selected => {
             const newLanguage = normalizeLanguage(selected) || LANGUAGE_FALLBACK;
             setUserLanguage(newLanguage);
-            window.localStorage.setItem('ljb-lang', newLanguage);
             window.history.pushState({}, '', getLanguagePath(newLanguage));
         }
     };
