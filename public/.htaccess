@@ -1,7 +1,10 @@
 RewriteEngine On
 
 # Legacy alias for Slovene.
-RewriteRule ^si/?$ /sl [R=301,L]
+RewriteRule ^si/?$ /sl/ [R=301,L]
+
+# Serve prerendered localized pages directly.
+RewriteRule ^(fr|en|sl)/?$ $1/index.html [L]
 
 # Serve existing files and folders directly.
 RewriteCond %{REQUEST_FILENAME} -f [OR]

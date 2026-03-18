@@ -2,19 +2,19 @@
     "rewrites": [
         {
             "source": "/fr",
-            "destination": "/index.html"
+            "destination": "/fr/index.html"
         },
         {
             "source": "/en",
-            "destination": "/index.html"
+            "destination": "/en/index.html"
         },
         {
             "source": "/sl",
-            "destination": "/index.html"
+            "destination": "/sl/index.html"
         },
         {
             "source": "/si",
-            "destination": "/index.html"
+            "destination": "/sl/index.html"
         }
     ]
 }
