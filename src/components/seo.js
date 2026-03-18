@@ -61,15 +61,18 @@ const Seo = () => {
     const lang = LOCALE_MAP[userLanguage] || 'en';
     const ogLocale = OG_LOCALE_MAP[userLanguage] || 'en_GB';
     const localizedUrl = getLocalizedUrl(userLanguage);
+    const is404Page = window.location.pathname.includes('404');
 
     document.documentElement.setAttribute('lang', lang);
 
-    const title = dictionary.seoTitle || 'Drevesa – Ljubljana Tree of the Year Map';
-    const description = dictionary.seoDescription || "Interactive map of Ljubljana’s citizen-elected Tree (and Avenue) of the Year since 2019, with stories, sources, and trilingual context.";
+    const title = is404Page
+      ? '404 | Drevesa'
+      : (dictionary.seoTitle || 'Drevesa - Ljubljana Tree of the Year Map');
+    const description = dictionary.seoDescription || "Interactive map of Ljubljana's citizen-elected Tree and Avenue of the Year since 2019, with stories, sources, and trilingual context.";
     const ogTitle = dictionary.seoOgTitle || title;
     const ogDescription = dictionary.seoOgDescription || description;
     const keywords = dictionary.seoKeywords || 'Ljubljana tree of the year, Drevesa, Ljubljana trees map';
-    const imageAlt = dictionary.seoImageAlt || 'Illustration of Ljubljana’s Tree of the Year badge';
+    const imageAlt = dictionary.seoImageAlt || "Illustration of Ljubljana's Tree of the Year badge";
 
     document.title = title;
 

@@ -118,11 +118,14 @@ async function fetchWalkingRoute(startCoords, endCoords) {
     }
 
     const data = await response.json();
-    const route = data?.routes?.[0];
-    const startWaypoint = data?.waypoints?.[0];
-    const endWaypoint = data?.waypoints?.[1];
+    const route = data && data.routes ? data.routes[0] : null;
+    const startWaypoint = data && data.waypoints ? data.waypoints[0] : null;
+    const endWaypoint = data && data.waypoints ? data.waypoints[1] : null;
+    const hasRouteGeometry = route && route.geometry && route.geometry.coordinates && route.geometry.coordinates.length;
+    const hasStartLocation = startWaypoint && startWaypoint.location && startWaypoint.location.length;
+    const hasEndLocation = endWaypoint && endWaypoint.location && endWaypoint.location.length;
 
-    if (!route || !route.geometry?.coordinates?.length || !startWaypoint?.location?.length || !endWaypoint?.location?.length) {
+    if (!route || !hasRouteGeometry || !hasStartLocation || !hasEndLocation) {
         throw new Error('route-not-found');
     }
 
