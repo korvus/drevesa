@@ -1,13 +1,159 @@
-import React, { useState, createContext, useRef, useContext, useEffect } from "react";
+import React, { useState, createContext, useRef, useContext, useEffect, useCallback } from "react";
 import { languageOptions, dictionaryList } from './datas/languages.js';
 import ReactStringReplace from 'react-string-replace';
+import trees from './datas/datas.json';
 
 export const PinContext = createContext(null);
 
 const LANGUAGE_FALLBACK = 'fr';
+const GAME_STORAGE_KEY = 'drevesa-passport-v1';
+const TOTAL_TREE_COUNT = Object.keys(trees).length;
+const ALL_TREE_COORDS = Object.values(trees).flatMap((entries) => entries.map((entry) => entry.coords));
 const LANGUAGE_ALIASES = {
     si: 'sl'
 };
+const FOOT_ROUTER_BASE_URL = 'https://routing.openstreetmap.de/routed-foot';
+const MAX_WALKING_TIME_MINUTES = 120;
+const LJUBLJANA_COORDS = [46.0507666, 14.5047565];
+
+function haversineDistanceInKm(fromCoords, toCoords) {
+    const toRadians = (degrees) => (degrees * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+    const [fromLat, fromLng] = fromCoords;
+    const [toLat, toLng] = toCoords;
+    const deltaLat = toRadians(toLat - fromLat);
+    const deltaLng = toRadians(toLng - fromLng);
+    const a =
+        Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(toRadians(fromLat)) *
+        Math.cos(toRadians(toLat)) *
+        Math.sin(deltaLng / 2) *
+        Math.sin(deltaLng / 2);
+
+    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function estimateWalkingDistanceInKm(directDistanceInKm) {
+    return directDistanceInKm * 1.28;
+}
+
+function estimateWalkingTimeInMinutes(distanceInKm) {
+    const averageWalkingSpeedKmPerHour = 4.8;
+    return Math.max(1, Math.round((distanceInKm / averageWalkingSpeedKmPerHour) * 60));
+}
+
+function findNearestTree(userCoords) {
+    let nearest = null;
+
+    Object.keys(trees).forEach((year) => {
+        trees[year].forEach((entry, index) => {
+            const directDistanceInKm = haversineDistanceInKm(userCoords, entry.coords);
+
+            if (!nearest || directDistanceInKm < nearest.directDistanceInKm) {
+                nearest = {
+                    year,
+                    index,
+                    coords: entry.coords,
+                    name: entry.name,
+                    directDistanceInKm,
+                    walkingDistanceInKm: estimateWalkingDistanceInKm(directDistanceInKm),
+                };
+            }
+        });
+    });
+
+    if (!nearest) {
+        return null;
+    }
+
+    return {
+        ...nearest,
+        walkingTimeInMinutes: estimateWalkingTimeInMinutes(nearest.walkingDistanceInKm),
+    };
+}
+
+function findNearestLockedTree(fromCoords, isTreeUnlocked) {
+    let nearest = null;
+
+    Object.keys(trees).forEach((year) => {
+        if (isTreeUnlocked(year)) {
+            return;
+        }
+
+        const entry = trees[year][0];
+        const directDistanceInKm = haversineDistanceInKm(fromCoords, entry.coords);
+
+        if (!nearest || directDistanceInKm < nearest.directDistanceInKm) {
+            nearest = {
+                year,
+                coords: entry.coords,
+                name: entry.name,
+                directDistanceInKm,
+                walkingDistanceInKm: estimateWalkingDistanceInKm(directDistanceInKm),
+                walkingTimeInMinutes: estimateWalkingTimeInMinutes(estimateWalkingDistanceInKm(directDistanceInKm)),
+            };
+        }
+    });
+
+    return nearest;
+}
+
+async function fetchWalkingRoute(startCoords, endCoords) {
+    const [startLat, startLng] = startCoords;
+    const [endLat, endLng] = endCoords;
+    const routeUrl = `${FOOT_ROUTER_BASE_URL}/route/v1/foot/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson&steps=true`;
+    const response = await fetch(routeUrl);
+
+    if (!response.ok) {
+        throw new Error('route-request-failed');
+    }
+
+    const data = await response.json();
+    const route = data && data.routes ? data.routes[0] : null;
+    const startWaypoint = data && data.waypoints ? data.waypoints[0] : null;
+    const endWaypoint = data && data.waypoints ? data.waypoints[1] : null;
+    const hasRouteGeometry = route && route.geometry && route.geometry.coordinates && route.geometry.coordinates.length;
+    const hasStartLocation = startWaypoint && startWaypoint.location && startWaypoint.location.length;
+    const hasEndLocation = endWaypoint && endWaypoint.location && endWaypoint.location.length;
+
+    if (!route || !hasRouteGeometry || !hasStartLocation || !hasEndLocation) {
+        throw new Error('route-not-found');
+    }
+
+    const [snappedStartLng, snappedStartLat] = startWaypoint.location;
+    const [snappedEndLng, snappedEndLat] = endWaypoint.location;
+
+    return {
+        coordinates: route.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
+        distanceInKm: route.distance / 1000,
+        durationInMinutes: Math.max(1, Math.round(route.duration / 60)),
+        snappedStart: [snappedStartLat, snappedStartLng],
+        snappedEnd: [snappedEndLat, snappedEndLng],
+        startSnapDistanceInMeters: startWaypoint.distance,
+        endSnapDistanceInMeters: endWaypoint.distance
+    };
+}
+
+function readGameState() {
+    try {
+        const rawValue = window.localStorage.getItem(GAME_STORAGE_KEY);
+        if (!rawValue) {
+            return { unlockedTrees: [], unlockAllTrees: false };
+        }
+
+        const parsedValue = JSON.parse(rawValue);
+        return {
+            unlockedTrees: Array.isArray(parsedValue.unlockedTrees) ? parsedValue.unlockedTrees : [],
+            unlockAllTrees: Boolean(parsedValue.unlockAllTrees)
+        };
+    } catch (error) {
+        return { unlockedTrees: [], unlockAllTrees: false };
+    }
+}
+
+function persistGameState(nextState) {
+    window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(nextState));
+}
 
 function normalizeLanguage(language) {
     const sanitizedLanguage = LANGUAGE_ALIASES[language] || language;
@@ -47,6 +193,17 @@ export const PinContextProvider = props => {
     const [userPosition, setUserPosition] = useState(null);
     const [routeToTree, setRouteToTree] = useState([]);
     const [routeMeta, setRouteMeta] = useState(null);
+    const [popupOpen, setPopupOpen] = useState(false);
+    const [requestedPopupTreeId, setRequestedPopupTreeId] = useState('');
+    const [nearestTree, setNearestTree] = useState(null);
+    const [nearestTreeState, setNearestTreeState] = useState('idle');
+    const [unlockedTrees, setUnlockedTrees] = useState([]);
+    const [unlockAllTrees, setUnlockAllTrees] = useState(false);
+    const [nextTreeSuggestion, setNextTreeSuggestion] = useState(null);
+    const [gameStateLoaded, setGameStateLoaded] = useState(false);
+    const [celebrationKey, setCelebrationKey] = useState(0);
+    const [recentlyUnlockedTreeId, setRecentlyUnlockedTreeId] = useState('');
+    const [selectedSpeciesId, setSelectedSpeciesId] = useState('');
 
     const [mapObj, setMapObj] = useState(null);
     const goToArea = (regionCoord, zoom = 13) => {
@@ -60,6 +217,17 @@ export const PinContextProvider = props => {
         setMapObj: setMapObj,
         goToArea: goToArea
     }
+    const focusAllTrees = useCallback(() => {
+        if (!mapObj || ALL_TREE_COORDS.length === 0) {
+            return;
+        }
+
+        mapObj.closePopup();
+        mapObj.flyToBounds(ALL_TREE_COORDS, {
+            padding: [48, 48],
+            maxZoom: 13
+        });
+    }, [mapObj]);
     const pathnameLanguage = getLanguageFromPathname(window.location.pathname);
     const activeLanguage = pathnameLanguage || userLanguage;
 
@@ -101,11 +269,229 @@ export const PinContextProvider = props => {
         return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
+    useEffect(() => {
+        if (typeof navigator !== 'undefined' && navigator.userAgent === 'ReactSnap') {
+            return;
+        }
+
+        const initialGameState = readGameState();
+        setUnlockedTrees(initialGameState.unlockedTrees);
+        setUnlockAllTrees(initialGameState.unlockAllTrees);
+        setGameStateLoaded(true);
+    }, []);
+
+    useEffect(() => {
+        if (typeof navigator !== 'undefined' && navigator.userAgent === 'ReactSnap') {
+            return;
+        }
+
+        if (!gameStateLoaded) {
+            return;
+        }
+
+        if (unlockAllTrees || unlockedTrees.length > 0) {
+            return;
+        }
+
+        setModalContent('intro');
+        setDm(true);
+    }, [gameStateLoaded, unlockAllTrees, unlockedTrees.length]);
+
+    const unlockTree = (treeId) => {
+        setUnlockedTrees((currentUnlockedTrees) => {
+            if (currentUnlockedTrees.includes(treeId)) {
+                return currentUnlockedTrees;
+            }
+
+            const nextUnlockedTrees = [...currentUnlockedTrees, treeId];
+            const hasUnlockedEveryTree = nextUnlockedTrees.length >= TOTAL_TREE_COUNT;
+            persistGameState({ unlockedTrees: nextUnlockedTrees, unlockAllTrees });
+            setRecentlyUnlockedTreeId(treeId);
+            setModalContent(hasUnlockedEveryTree ? 'gameVictory' : 'treeUnlocked');
+            setDm(true);
+            if (hasUnlockedEveryTree) {
+                setNextTreeSuggestion(null);
+            }
+            setCelebrationKey((currentKey) => currentKey + 1);
+            return nextUnlockedTrees;
+        });
+    };
+
+    const unlockEveryTree = () => {
+        setUnlockAllTrees(true);
+        setNextTreeSuggestion(null);
+        persistGameState({ unlockedTrees, unlockAllTrees: true });
+    };
+
+    const resetUnlockedPassport = () => {
+        setUnlockAllTrees(false);
+        setUnlockedTrees([]);
+        setNextTreeSuggestion(null);
+        persistGameState({ unlockedTrees: [], unlockAllTrees: false });
+    };
+
+    const isTreeUnlocked = (treeId) => unlockAllTrees || unlockedTrees.includes(treeId);
+
+    const openSpeciesModal = useCallback((speciesId) => {
+        if (!speciesId) {
+            return;
+        }
+
+        setSelectedSpeciesId(speciesId);
+        setModalContent('species');
+        setDm(true);
+    }, []);
+
+    const traceNextLockedTreeFrom = useCallback(async (fromTreeId) => {
+        const fromTree = trees[fromTreeId] && trees[fromTreeId][0];
+        const currentPosition = userPosition || (fromTree ? fromTree.coords : null);
+
+        if (!currentPosition) {
+            return null;
+        }
+
+        const nextTree = findNearestLockedTree(
+            fromTree ? fromTree.coords : currentPosition,
+            (treeId) => unlockAllTrees || unlockedTrees.includes(treeId)
+        );
+
+        if (!nextTree) {
+            setNextTreeSuggestion(null);
+            setRouteToTree([]);
+            setRouteMeta(null);
+            setYearselected(0);
+            setRequestedPopupTreeId('');
+            return null;
+        }
+
+        setNextTreeSuggestion(nextTree);
+        setYearselected(nextTree.year);
+        setRequestedPopupTreeId(nextTree.year);
+
+        try {
+            const route = await fetchWalkingRoute(currentPosition, nextTree.coords);
+            setUserPosition(route.snappedStart);
+            setRouteToTree(route.coordinates);
+            setRouteMeta({
+                distanceInKm: route.distanceInKm,
+                durationInMinutes: route.durationInMinutes,
+                startSnapDistanceInMeters: route.startSnapDistanceInMeters,
+                endSnapDistanceInMeters: route.endSnapDistanceInMeters
+            });
+        } catch (error) {
+            setRouteToTree([]);
+            setRouteMeta(null);
+        }
+
+        if (mapObj) {
+            mapObj.flyTo(nextTree.coords, 16);
+        }
+
+        return nextTree;
+    }, [mapObj, unlockAllTrees, unlockedTrees, userPosition]);
+
+    const locateNearestTree = useCallback(() => {
+        if (!navigator.geolocation) {
+            setNearestTree(null);
+            setNearestTreeState('unsupported');
+            setUserPosition(null);
+            setRouteToTree([]);
+            setRouteMeta(null);
+            return;
+        }
+
+        setNearestTreeState('loading');
+
+        navigator.geolocation.getCurrentPosition(
+            async ({ coords }) => {
+                const currentUserPosition = [coords.latitude, coords.longitude];
+                const closest = findNearestTree(currentUserPosition);
+
+                if (!closest) {
+                    setNearestTree(null);
+                    setNearestTreeState('error');
+                    setUserPosition(currentUserPosition);
+                    setRouteToTree([]);
+                    setRouteMeta(null);
+                    return;
+                }
+
+                setUserPosition(currentUserPosition);
+
+                if (closest.walkingTimeInMinutes > MAX_WALKING_TIME_MINUTES) {
+                    setNearestTree(closest);
+                    setRouteToTree([]);
+                    setRouteMeta(null);
+                    setNearestTreeState('too-far');
+                    setModalContent('tooFar');
+                    setDm(true);
+                    setYearselected(0);
+                    setRequestedPopupTreeId('');
+                    setTmppins(0);
+                    if (mapObj) {
+                        mapObj.flyTo(closest.coords, 12);
+                    }
+                    return;
+                }
+
+                try {
+                    const route = await fetchWalkingRoute(currentUserPosition, closest.coords);
+
+                    setNearestTree({
+                        ...closest,
+                        walkingDistanceInKm: route.distanceInKm,
+                        walkingTimeInMinutes: route.durationInMinutes,
+                    });
+                    setUserPosition(route.snappedStart);
+                    setRouteToTree(route.coordinates);
+                    setRouteMeta({
+                        distanceInKm: route.distanceInKm,
+                        durationInMinutes: route.durationInMinutes,
+                        startSnapDistanceInMeters: route.startSnapDistanceInMeters,
+                        endSnapDistanceInMeters: route.endSnapDistanceInMeters
+                    });
+                    setNearestTreeState('ready');
+                } catch (error) {
+                    setNearestTree(closest);
+                    setRouteToTree([]);
+                    setRouteMeta(null);
+                    setNearestTreeState('route-error');
+                }
+
+                setYearselected(closest.year);
+                setRequestedPopupTreeId(closest.year);
+                setTmppins(0);
+                if (mapObj) {
+                    mapObj.flyTo(closest.coords, 17);
+                }
+            },
+            (error) => {
+                setNearestTree(null);
+                setUserPosition(null);
+                setRouteToTree([]);
+                setRouteMeta(null);
+
+                if (error.code === error.PERMISSION_DENIED) {
+                    setNearestTreeState('denied');
+                    return;
+                }
+
+                setNearestTreeState('error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+            }
+        );
+    }, [mapObj]);
+
     const provider = {
         dm,
         setDm,
         mapRef,
         mapData,
+        focusAllTrees,
         warning,
         goToArea,
         setWarning,
@@ -113,10 +499,29 @@ export const PinContextProvider = props => {
         userPosition, setUserPosition,
         routeToTree, setRouteToTree,
         routeMeta, setRouteMeta,
+        popupOpen, setPopupOpen,
+        requestedPopupTreeId, setRequestedPopupTreeId,
+        nearestTree, setNearestTree,
+        nearestTreeState, setNearestTreeState,
+        locateNearestTree,
+        nextTreeSuggestion, setNextTreeSuggestion,
+        traceNextLockedTreeFrom,
+        celebrationKey,
+        recentlyUnlockedTreeId, setRecentlyUnlockedTreeId,
+        selectedSpeciesId, setSelectedSpeciesId,
+        unlockedTrees, setUnlockedTrees,
+        unlockAllTrees,
+        unlockTree,
+        unlockEveryTree,
+        resetUnlockedPassport,
+        isTreeUnlocked,
+        gameDistanceThresholdMeters: 20,
+        ljubljanaCoords: LJUBLJANA_COORDS,
         tmppins, setTmppins,
         divWidth, setDivWidth,
         showClouds, setShowClouds,
         modalContent, setModalContent,
+        openSpeciesModal,
         yearselected, setYearselected,
         dictionary: dictionaryList[activeLanguage],
         userLanguageChange: selected => {
@@ -133,23 +538,30 @@ export const PinContextProvider = props => {
     );
 };
 
-export function Text({ tid, classLink }) {
+export function Text({ tid, classLink, as: Wrapper = 'div' }) {
     const languageContext = useContext(PinContext);
 
     let str = languageContext.dictionary[tid] ? languageContext.dictionary[tid] : "";
 
-    const matchGlobal = str.match(/\[a href='(.*?)'\](.*?)\[\/a\]|\[br\]/g);
+    const matchGlobal = str.match(/\[a href='(.*?)'\](.*?)\[\/a\]|\[strong\](.*?)\[\/strong\]|\[br\]/g);
 
     if (matchGlobal) {
         let replaced = str;
         matchGlobal.forEach((match) => {
             // console.log("matchGlobal", match);
             let regexLink = /\[a href='(.*?)'\](.*?)\[\/a\]/;
+            let regexStrong = /\[strong\](.*?)\[\/strong\]/;
             let regexBr = /\[br\]/;
             if (regexLink.test(match)) {
                 const [, link, text] = match.match(regexLink);
                 replaced = ReactStringReplace(replaced, match, () => {
                     return <a target="blank" className={classLink} href={link}>{text}</a>
+                });
+            };
+            if (regexStrong.test(match)) {
+                const [, text] = match.match(regexStrong);
+                replaced = ReactStringReplace(replaced, match, () => {
+                    return <strong>{text}</strong>
                 });
             };
             if (regexBr.test(match)) {
@@ -159,7 +571,7 @@ export function Text({ tid, classLink }) {
             }
         });
         const result = React.Children.toArray(replaced);
-        return <div>{result}</div>
+        return <Wrapper>{result}</Wrapper>
     }
     return <>{str}</>;
 

@@ -7,14 +7,14 @@ const InteractiveMap = lazy(() => import('./interactiveMap.js'));
 const IS_PRERENDER = typeof navigator !== 'undefined' && navigator.userAgent === 'ReactSnap';
 
 const Map = () => {
-    const { dm } = useContext(PinContext);
+    const { dm, modalContent } = useContext(PinContext);
 
     if (IS_PRERENDER) {
         return (
             <div className="App">
                 <div className="mapContainer mapPlaceholder">
                     {dm === true &&
-                        <div className={"modal"}>
+                        <div className={`modal${modalContent === 'intro' ? ' modal--intro' : ''}${modalContent === 'about' ? ' modal--about' : ''}${modalContent === 'tooFar' ? ' modal--compact' : ''}${modalContent === 'treeUnlocked' ? ' modal--unlock' : ''}${modalContent === 'gameVictory' ? ' modal--victory' : ''}${modalContent === 'species' ? ' modal--species' : ''}`}>
                             <Modalcontent />
                         </div>
                     }

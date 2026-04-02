@@ -7,63 +7,19 @@ import badge from '../img/badge.png';
 
 const listDate = Object.keys(trees);
 const LJUBLJANA_COORDS = [46.0507666, 14.5047565];
-const FOOT_ROUTER_BASE_URL = 'https://routing.openstreetmap.de/routed-foot';
 const MAX_WALKING_TIME_MINUTES = 120;
 
-function haversineDistanceInKm(fromCoords, toCoords) {
-    const toRadians = (degrees) => (degrees * Math.PI) / 180;
-    const earthRadiusKm = 6371;
-    const [fromLat, fromLng] = fromCoords;
-    const [toLat, toLng] = toCoords;
-    const deltaLat = toRadians(toLat - fromLat);
-    const deltaLng = toRadians(toLng - fromLng);
-    const a =
-        Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-        Math.cos(toRadians(fromLat)) *
-        Math.cos(toRadians(toLat)) *
-        Math.sin(deltaLng / 2) *
-        Math.sin(deltaLng / 2);
-
-    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function estimateWalkingDistanceInKm(directDistanceInKm) {
-    return directDistanceInKm * 1.28;
-}
-
-function estimateWalkingTimeInMinutes(distanceInKm) {
-    const averageWalkingSpeedKmPerHour = 4.8;
-    return Math.max(1, Math.round((distanceInKm / averageWalkingSpeedKmPerHour) * 60));
-}
-
-function findNearestTree(userCoords) {
-    let nearest = null;
-
-    listDate.forEach((year) => {
-        trees[year].forEach((entry, index) => {
-            const directDistanceInKm = haversineDistanceInKm(userCoords, entry.coords);
-
-            if (!nearest || directDistanceInKm < nearest.directDistanceInKm) {
-                nearest = {
-                    year,
-                    index,
-                    coords: entry.coords,
-                    name: entry.name,
-                    directDistanceInKm,
-                    walkingDistanceInKm: estimateWalkingDistanceInKm(directDistanceInKm),
-                };
-            }
-        });
-    });
-
-    if (!nearest) {
-        return null;
-    }
-
-    return {
-        ...nearest,
-        walkingTimeInMinutes: estimateWalkingTimeInMinutes(nearest.walkingDistanceInKm),
-    };
+function WalkingIcon() {
+    return (
+        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+            <circle cx="32" cy="11" r="5" />
+            <path d="M32 19v14" />
+            <path d="M32 24l-10 8" />
+            <path d="M32 24l10 6" />
+            <path d="M32 33l-8 17" />
+            <path d="M32 33l9 18" />
+        </svg>
+    );
 }
 
 function formatDistance(distanceInKm, language) {
@@ -107,65 +63,111 @@ function renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, use
     );
 }
 
-async function fetchWalkingRoute(startCoords, endCoords) {
-    const [startLat, startLng] = startCoords;
-    const [endLat, endLng] = endCoords;
-    const routeUrl = `${FOOT_ROUTER_BASE_URL}/route/v1/foot/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson&steps=true`;
-    const response = await fetch(routeUrl);
-
-    if (!response.ok) {
-        throw new Error('route-request-failed');
+function renderNearestTreeFeedbackContent(nearestTreeState, nearestTree, nearestTreeSummary) {
+    if (nearestTreeState === 'unsupported') {
+        return (
+            <p className="nearestTreeStatus">
+                <Text tid="nearestTreeUnsupported" />
+            </p>
+        );
     }
 
-    const data = await response.json();
-    const route = data && data.routes ? data.routes[0] : null;
-    const startWaypoint = data && data.waypoints ? data.waypoints[0] : null;
-    const endWaypoint = data && data.waypoints ? data.waypoints[1] : null;
-    const hasRouteGeometry = route && route.geometry && route.geometry.coordinates && route.geometry.coordinates.length;
-    const hasStartLocation = startWaypoint && startWaypoint.location && startWaypoint.location.length;
-    const hasEndLocation = endWaypoint && endWaypoint.location && endWaypoint.location.length;
-
-    if (!route || !hasRouteGeometry || !hasStartLocation || !hasEndLocation) {
-        throw new Error('route-not-found');
+    if (nearestTreeState === 'denied') {
+        return (
+            <p className="nearestTreeStatus">
+                <Text tid="nearestTreeDenied" />
+            </p>
+        );
     }
 
-    const [snappedStartLng, snappedStartLat] = startWaypoint.location;
-    const [snappedEndLng, snappedEndLat] = endWaypoint.location;
+    if (nearestTreeState === 'error') {
+        return (
+            <p className="nearestTreeStatus">
+                <Text tid="nearestTreeError" />
+            </p>
+        );
+    }
 
-    return {
-        coordinates: route.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
-        distanceInKm: route.distance / 1000,
-        durationInMinutes: Math.max(1, Math.round(route.duration / 60)),
-        snappedStart: [snappedStartLat, snappedStartLng],
-        snappedEnd: [snappedEndLat, snappedEndLng],
-        startSnapDistanceInMeters: startWaypoint.distance,
-        endSnapDistanceInMeters: endWaypoint.distance
-    };
+    if (nearestTreeState === 'loading') {
+        return (
+            <p className="nearestTreeStatus">
+                <Text tid="nearestTreeLoading" />
+            </p>
+        );
+    }
+
+    if (nearestTreeState === 'route-error' && nearestTree) {
+        return (
+            <div className="nearestTreeStatus nearestTreeResult">
+                <p>{nearestTreeSummary}</p>
+                <p><Text tid="nearestTreeRouteUnavailable" /></p>
+            </div>
+        );
+    }
+
+    if (nearestTreeState === 'too-far' && nearestTree) {
+        return (
+            <div className="nearestTreeStatus nearestTreeResult">
+                <p>{nearestTreeSummary}</p>
+            </div>
+        );
+    }
+
+    if (nearestTreeState === 'ready' && nearestTree) {
+        return (
+            <div className="nearestTreeStatus nearestTreeResult">
+                <p>{nearestTreeSummary}</p>
+            </div>
+        );
+    }
+
+    return null;
 }
 
 const ListByYears = (props) => {
+    const { isTreeUnlocked, setDm } = useContext(PinContext);
     const [setYearselected, yearselected, mapData] = props.actions;
     const setTmppins = props.hover;
 
+    const handleYearClick = (event, value) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setTmppins(0);
+
+        if (mapData.mapObj) {
+            mapData.mapObj.closePopup();
+        }
+
+        if (value === yearselected) {
+            setYearselected(0);
+            mapData.goToArea(LJUBLJANA_COORDS, 13);
+        } else {
+            setYearselected(value);
+            const goToLngLt = trees[value][0].coords;
+            mapData.goToArea(goToLngLt, 16);
+        }
+
+        // Close after the current pointer/click sequence to avoid click-through on the map.
+        window.setTimeout(() => {
+            setDm(false);
+        }, 0);
+    };
 
     const years = [];
     for (const [index, value] of listDate.entries()) {
+        const isUnlocked = isTreeUnlocked(value);
+        const itemClassName = [
+            yearselected === value ? "active" : "",
+            !isUnlocked ? "locked" : ""
+        ].filter(Boolean).join(" ");
+
         years.push(
             <li
-                className={yearselected === value ? "active" : ""}
+                className={itemClassName}
                 key={index}
                 onPointerMove={() => setTmppins(value)}
                 onPointerOut={() => setTmppins(0)}
-                onClick={() => {
-                    if (value === yearselected) {
-                        setYearselected(0);
-                        mapData.goToArea(LJUBLJANA_COORDS, 13);
-                    } else {
-                        setYearselected(value);
-                        const goToLngLt = trees[value][0].coords;
-                        mapData.goToArea(goToLngLt, 16);
-                    };
-                }}>
+                onClick={(event) => handleYearClick(event, value)}>
                 {value}
             </li>
         );
@@ -175,9 +177,7 @@ const ListByYears = (props) => {
 
 const Col = () => {
     const [circles, setCircles] = useState([]);
-    const [nearestTree, setNearestTree] = useState(null);
-    const [nearestTreeState, setNearestTreeState] = useState('idle');
-    const { setDm, dm, setYearselected, setShowClouds, showClouds, setModalContent, setTmppins, yearselected, mapData, dictionary, userLanguage, setUserPosition, setRouteToTree, setRouteMeta } = useContext(PinContext);
+    const { setDm, dm, setYearselected, setShowClouds, showClouds, setModalContent, setTmppins, yearselected, mapData, dictionary, userLanguage, popupOpen, nearestTree, nearestTreeState, locateNearestTree, focusAllTrees } = useContext(PinContext);
 
     const escFunction = useCallback((event) => {
         if (event.keyCode === 27) {
@@ -206,98 +206,14 @@ const Col = () => {
         setCircles(newCircles);
     }
 
-    const handleLocateNearestTree = useCallback(() => {
-        if (!navigator.geolocation) {
-            setNearestTree(null);
-            setNearestTreeState('unsupported');
-            setUserPosition(null);
-            setRouteToTree([]);
-            setRouteMeta(null);
-            return;
-        }
-
-        setNearestTreeState('loading');
-
-        navigator.geolocation.getCurrentPosition(
-            async ({ coords }) => {
-                const currentUserPosition = [coords.latitude, coords.longitude];
-                const closest = findNearestTree([coords.latitude, coords.longitude]);
-
-                if (!closest) {
-                    setNearestTree(null);
-                    setNearestTreeState('error');
-                    setUserPosition(currentUserPosition);
-                    setRouteToTree([]);
-                    setRouteMeta(null);
-                    return;
-                }
-
-                setUserPosition(currentUserPosition);
-
-                if (closest.walkingTimeInMinutes > MAX_WALKING_TIME_MINUTES) {
-                    setNearestTree(closest);
-                    setRouteToTree([]);
-                    setRouteMeta(null);
-                    setNearestTreeState('too-far');
-                    setModalContent('tooFar');
-                    setDm(true);
-                    setYearselected(closest.year);
-                    setTmppins(0);
-                    mapData.goToArea(closest.coords, 12);
-                    return;
-                }
-
-                try {
-                    const route = await fetchWalkingRoute(currentUserPosition, closest.coords);
-
-                    setNearestTree({
-                        ...closest,
-                        walkingDistanceInKm: route.distanceInKm,
-                        walkingTimeInMinutes: route.durationInMinutes,
-                    });
-                    setUserPosition(route.snappedStart);
-                    setRouteToTree(route.coordinates);
-                    setRouteMeta({
-                        distanceInKm: route.distanceInKm,
-                        durationInMinutes: route.durationInMinutes,
-                        startSnapDistanceInMeters: route.startSnapDistanceInMeters,
-                        endSnapDistanceInMeters: route.endSnapDistanceInMeters
-                    });
-                    setNearestTreeState('ready');
-                } catch (error) {
-                    setNearestTree(closest);
-                    setRouteToTree([]);
-                    setRouteMeta(null);
-                    setNearestTreeState('route-error');
-                }
-
-                setYearselected(closest.year);
-                setTmppins(0);
-                mapData.goToArea(closest.coords, 17);
-            },
-            (error) => {
-                setNearestTree(null);
-                setUserPosition(null);
-                setRouteToTree([]);
-                setRouteMeta(null);
-
-                if (error.code === error.PERMISSION_DENIED) {
-                    setNearestTreeState('denied');
-                    return;
-                }
-
-                setNearestTreeState('error');
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000
-            }
-        );
-    }, [mapData, setDm, setModalContent, setRouteMeta, setRouteToTree, setTmppins, setUserPosition, setYearselected]);
-
     const nearestTreeLabel = nearestTree ? (dictionary[`adrs${nearestTree.year}`] || nearestTree.year) : '';
     const nearestTreeSummary = renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, userLanguage);
+    const nearestTreeFeedback = renderNearestTreeFeedbackContent(nearestTreeState, nearestTree, nearestTreeSummary);
+    const handleBadgeClick = () => {
+        setYearselected(0);
+        setTmppins(0);
+        focusAllTrees();
+    };
 
 
     return (
@@ -310,53 +226,25 @@ const Col = () => {
                     <span className="about">?</span>
                 </h1>
 
-                <div className="badgeWrapper">
+                <button
+                    type="button"
+                    className="badgeWrapper"
+                    onClick={handleBadgeClick}
+                    title={dictionary.mapResetViewAction || 'Show all trees'}
+                    aria-label={dictionary.mapResetViewAction || 'Show all trees'}
+                >
                     <img src={badge} alt="Ljubljana tree badge" />
-                </div>
+                </button>
 
                 <div className="content">
                     <ListByYears actions={[setYearselected, yearselected, mapData]} hover={setTmppins} />
                     <div className="nearestTreeCard">
-                        <button type="button" className="nearestTreeButton" onClick={handleLocateNearestTree}>
+                        <button type="button" className="nearestTreeButton nearestTreeButton--panel" onClick={locateNearestTree}>
                             {nearestTreeState === 'loading' ? <Text tid="nearestTreeLoading" /> : <Text tid="nearestTreeAction" />}
                         </button>
-
-                        {nearestTreeState === 'unsupported' && (
-                            <p className="nearestTreeStatus">
-                                <Text tid="nearestTreeUnsupported" />
-                            </p>
-                        )}
-
-                        {nearestTreeState === 'denied' && (
-                            <p className="nearestTreeStatus">
-                                <Text tid="nearestTreeDenied" />
-                            </p>
-                        )}
-
-                        {nearestTreeState === 'error' && (
-                            <p className="nearestTreeStatus">
-                                <Text tid="nearestTreeError" />
-                            </p>
-                        )}
-
-                        {nearestTreeState === 'route-error' && nearestTree && (
-                            <div className="nearestTreeStatus nearestTreeResult">
-                                <p>{nearestTreeSummary}</p>
-                                <p><Text tid="nearestTreeRouteUnavailable" /></p>
-                            </div>
-                        )}
-
-                        {nearestTreeState === 'too-far' && nearestTree && (
-                            <div className="nearestTreeStatus nearestTreeResult">
-                                <p>{nearestTreeSummary}</p>
-                            </div>
-                        )}
-
-                        {nearestTreeState === 'ready' && nearestTree && (
-                            <div className="nearestTreeStatus nearestTreeResult">
-                                <p>{nearestTreeSummary}</p>
-                            </div>
-                        )}
+                        <div className="nearestTreeFeedback nearestTreeFeedback--panel">
+                            {nearestTreeFeedback}
+                        </div>
                     </div>
                 </div>
 
@@ -367,6 +255,22 @@ const Col = () => {
                 </div>
 
             </div>
+            {!dm && !popupOpen && (
+                <button
+                    type="button"
+                    className="nearestTreeButton nearestTreeButton--floating"
+                    onClick={locateNearestTree}
+                    aria-label={dictionary.nearestTreeAction || 'Find the nearest tree'}
+                    title={dictionary.nearestTreeAction || 'Find the nearest tree'}
+                >
+                    <WalkingIcon />
+                </button>
+            )}
+            {!dm && nearestTreeFeedback && (
+                <div className="nearestTreeFeedback nearestTreeFeedback--floating">
+                    {nearestTreeFeedback}
+                </div>
+            )}
             <div className="containerDeco">
                 <div className="containerCircles">
                     {circles.map((circle, index) => (

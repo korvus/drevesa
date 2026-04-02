@@ -21,7 +21,7 @@ The map expects the data files to remain valid JSON. Run the app locally after e
 1. Add the new marker icons (active + inactive) to `src/img/`.
 2. Register them in `src/components/icon.js`.
 3. Append the yearly entry inside `src/datas/datas.json` (coordinates, icon keys, map link).
-4. Update translations (`src/datas/en.json`, `fr.json`, `sl.json`) and cite the source in `src/datas/roots.json`.
+4. Update translations (`src/datas/en.json`, `fr.json`, `sl.json`) and, if needed, adjust the single reference link shown in the About modal.
 
 ### Credits
 Built by [Simon Ertel](https://simonertel.net). Map tiles © OpenStreetMap contributors.
@@ -49,7 +49,7 @@ Veillez à conserver des JSON valides. Testez l'appli en local après chaque mis
 1. Ajouter les nouvelles icônes (actives + inactives) dans `src/img/`.
 2. Les enregistrer dans `src/components/icon.js`.
 3. Compléter l'entrée annuelle dans `src/datas/datas.json` (coordonnées, icônes, lien Google Maps).
-4. Mettre à jour les traductions (`src/datas/en.json`, `fr.json`, `sl.json`) et référencer la source dans `src/datas/roots.json`.
+4. Mettre à jour les traductions (`src/datas/en.json`, `fr.json`, `sl.json`) et, si besoin, ajuster le lien de référence unique affiché dans la modale À propos.
 
 ### Crédits
 Créé par Simon Ertel. Tuiles cartographiques © contributeurs OpenStreetMap.
@@ -77,7 +77,7 @@ Po vsaki spremembi podatkov preverite, da JSON ostane veljaven in da se aplikaci
 1. Dodajte nove ikone (aktivne + neaktivne) v `src/img/`.
 2. Prijavite jih v `src/components/icon.js`.
 3. Dodajte letni zapis v `src/datas/datas.json` (koordinate, ikone, povezava).
-4. Osvežite prevode (`src/datas/en.json`, `fr.json`, `sl.json`) ter vir v `src/datas/roots.json`.
+4. Osvežite prevode (`src/datas/en.json`, `fr.json`, `sl.json`) in po potrebi prilagodite enotno referenčno povezavo v modalu O projektu.
 
 ### Zahvale
 Avtor [Simon Ertel](https://simonertel.net). Kartografski podatki © sodelavci OpenStreetMap.

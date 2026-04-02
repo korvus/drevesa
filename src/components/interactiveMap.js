@@ -12,24 +12,229 @@ import Cloud from './cloud.js';
 import "leaflet/dist/leaflet.css";
 import Modalcontent from './modal.js';
 import coords from '../datas/datas.json';
-import sources from '../datas/roots.json';
 import { PinContext, Text } from '../store';
 import { useEffect, useRef, useContext, useState, useCallback } from "react";
 import { getIcon } from '../components/icon.js';
+import speciesDetails from '../datas/speciesDetails.js';
+import herbierFerme from '../img/herbierFerme.png';
 
 const Ljubljana = [46.0507666, 14.5047565];
 const listDate = Object.keys(coords);
+const GAME_DISTANCE_THRESHOLD_METERS = 20;
 
-function constructJsx(trees, map, markerRef, userLanguage) {
+function haversineDistanceInMeters(fromCoords, toCoords) {
+    const toRadians = (degrees) => (degrees * Math.PI) / 180;
+    const earthRadiusMeters = 6371000;
+    const [fromLat, fromLng] = fromCoords;
+    const [toLat, toLng] = toCoords;
+    const deltaLat = toRadians(toLat - fromLat);
+    const deltaLng = toRadians(toLng - fromLng);
+    const a =
+        Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(toRadians(fromLat)) *
+        Math.cos(toRadians(toLat)) *
+        Math.sin(deltaLng / 2) *
+        Math.sin(deltaLng / 2);
+
+    return earthRadiusMeters * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function LockedTreePopup({ treeId, coords }) {
+    const { userPosition, setUserPosition, unlockTree } = useContext(PinContext);
+    const [distanceInMeters, setDistanceInMeters] = useState(null);
+    const [geoStatus, setGeoStatus] = useState('idle');
+    const watchIdRef = useRef(null);
+    const lastPositionRef = useRef(null);
+    const lastUpdateTsRef = useRef(0);
+
+    useEffect(() => {
+        if (!userPosition) {
+            setDistanceInMeters(null);
+            return;
+        }
+
+        setDistanceInMeters(Math.round(haversineDistanceInMeters(userPosition, coords)));
+    }, [coords, userPosition]);
+
+    const isNearby = distanceInMeters !== null && distanceInMeters <= GAME_DISTANCE_THRESHOLD_METERS;
+
+    useEffect(() => {
+        if (!navigator.geolocation) {
+            return undefined;
+        }
+
+        const maybeUpdatePosition = (coords) => {
+            const nextPosition = [coords.latitude, coords.longitude];
+            const now = Date.now();
+            const lastPosition = lastPositionRef.current;
+            const lastUpdateTs = lastUpdateTsRef.current;
+
+            if (lastPosition) {
+                const movedDistance = haversineDistanceInMeters(lastPosition, nextPosition);
+                const elapsedMs = now - lastUpdateTs;
+
+                // Ignore tiny GPS jitter unless enough time has passed.
+                if (movedDistance < 5 && elapsedMs < 12000) {
+                    return;
+                }
+            }
+
+            lastPositionRef.current = nextPosition;
+            lastUpdateTsRef.current = now;
+            setUserPosition(nextPosition);
+            setGeoStatus('ready');
+        };
+
+        watchIdRef.current = navigator.geolocation.watchPosition(
+            ({ coords: currentCoords }) => {
+                maybeUpdatePosition(currentCoords);
+            },
+            () => {
+                setGeoStatus('error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 10000
+            }
+        );
+
+        return () => {
+            if (watchIdRef.current !== null) {
+                navigator.geolocation.clearWatch(watchIdRef.current);
+                watchIdRef.current = null;
+            }
+        };
+    }, [setUserPosition]);
+
+    const handleUseLocation = () => {
+        if (!navigator.geolocation) {
+            setGeoStatus('unsupported');
+            return;
+        }
+
+        setGeoStatus('loading');
+        navigator.geolocation.getCurrentPosition(
+            ({ coords: currentCoords }) => {
+                setUserPosition([currentCoords.latitude, currentCoords.longitude]);
+                setGeoStatus('ready');
+            },
+            () => {
+                setGeoStatus('error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+            }
+        );
+    };
+
+    return (
+        <div className="gamePopup">
+            <span className="title">{treeId}</span>
+            <p><Text tid="gameLockedIntro" /></p>
+            {distanceInMeters !== null && (
+                <p>
+                    <Text tid="gameLockedDistance" /> {distanceInMeters} m.
+                </p>
+            )}
+            {isNearby ? (
+                <button type="button" className="gamePopupButton" onClick={() => unlockTree(treeId)}>
+                    <Text tid="gameUnlockCta" />
+                </button>
+            ) : (
+                <button type="button" className="gamePopupButton gamePopupButton--secondary" onClick={handleUseLocation}>
+                    {geoStatus === 'loading' ? <Text tid="nearestTreeLoading" /> : <Text tid="gameUseLocation" />}
+                </button>
+            )}
+            {distanceInMeters !== null && !isNearby && (
+                <p><Text tid="gameNeedCloser" /></p>
+            )}
+            {geoStatus === 'unsupported' && <p><Text tid="nearestTreeUnsupported" /></p>}
+            {geoStatus === 'error' && <p><Text tid="nearestTreeError" /></p>}
+        </div>
+    );
+}
+
+function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
+    const { traceNextLockedTreeFrom, openSpeciesModal, dictionary, isTreeUnlocked } = useContext(PinContext);
+    const [traceState, setTraceState] = useState('idle');
+    const speciesData = speciesDetails[treeData.name];
+    const hasRemainingLockedTrees = listDate.some((year) => !isTreeUnlocked(year));
+
+    const handleTraceNextTree = async () => {
+        setTraceState('loading');
+        const nextTree = await traceNextLockedTreeFrom(treeId);
+        setTraceState(nextTree ? 'ready' : 'done');
+    };
+
+    return (
+        <>
+            <span className="title">{treeId}</span>
+            <div className="unlockedPopupBody">
+                <div className="popupField popupField--species">
+                    <div className="popupFieldValue">
+                        {speciesData ? (
+                            <button
+                                type="button"
+                                className="speciesTrigger"
+                                onClick={() => openSpeciesModal(treeData.name)}
+                                title={dictionary.speciesModalTriggerHint}
+                                aria-label={dictionary.speciesModalTriggerHint}
+                            >
+                                <img className="speciesTriggerIcon" src={herbierFerme} alt="" aria-hidden="true" />
+                                <Text as="span" tid={speciesData.nameTid} />
+                            </button>
+                        ) : (
+                            <Text as="span" tid={treeData.name} />
+                        )}
+                    </div>
+                </div>
+                <div className="popupField popupField--address">
+                    <span className="popupFieldLabel"><Text tid='address' /></span>
+                    <div className="popupFieldValue">
+                        <a
+                            className="externalLink"
+                            rel="noreferrer"
+                            target="_blank"
+                            href={treeData.adresse}
+                        >
+                            <Text tid={`adrs${treeId}`} />
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div className="gamePopup gamePopup--next">
+                {hasRemainingLockedTrees ? (
+                    <>
+                        <p><Text tid="gameNextTreePrompt" /></p>
+                        <button type="button" className="gamePopupButton" onClick={handleTraceNextTree}>
+                            {traceState === 'loading' ? <Text tid="nearestTreeLoading" /> : <Text tid="gameTraceNextTree" />}
+                        </button>
+                        {traceState === 'done' && (
+                            <p><Text tid="gameAllTreesUnlocked" /></p>
+                        )}
+                    </>
+                ) : (
+                    <p><Text tid="gameAllTreesUnlocked" /></p>
+                )}
+            </div>
+        </>
+    );
+}
+
+function constructJsx(trees, map, markerRef, userLanguage, isTreeUnlocked, setYearselected) {
     const jsxElements = [];
     let i = 0;
     let shouldBeOneAtLeast = 0;
     for (var tree in trees) {
 
-        const title = trees[tree].popup[0];
+        const title = String(trees[tree].popup[0]);
 
         if (trees.hasOwnProperty(tree)) {
-            const icone = getIcon(trees[tree].icon);
+            const unlocked = isTreeUnlocked(title);
+            const icone = getIcon(unlocked ? trees[tree].icon : 'questionMarkTree');
 
             if (map.getBounds().contains(trees[tree].coords)) { shouldBeOneAtLeast++ };
 
@@ -39,27 +244,18 @@ function constructJsx(trees, map, markerRef, userLanguage) {
                     position={trees[tree].coords}
                     icon={icone}
                     ref={el => { markerRef.current[title] = el }}
+                    eventHandlers={{
+                        popupopen: () => {
+                            setYearselected(title);
+                        }
+                    }}
                 >
-                    <Popup>
-                        <span className="title">{title}</span>
-                        <strong>
-                            <span><Text tid="essence" /> : </span>
-                            <Text classLink='externalLink' tid={trees[tree].name} />
-                            <br />
-                            <span><Text tid='address' /></span>
-                            <a className="externalLink"
-                                rel="noreferrer"
-                                target="_blank"
-                                href={trees[tree].adresse}>
-                                <Text tid={`adrs${title}`} />
-                            </a>
-                            <br /><br />
-                            {sources[userLanguage] &&
-                                <a className="externalLink" target="blank" href={sources[userLanguage][title]}>
-                                    <Text tid={`sources`} />
-                                </a>
-                            }
-                        </strong>
+                    <Popup maxWidth={264} minWidth={0}>
+                        {unlocked ? (
+                            <UnlockedTreePopup treeId={title} treeData={trees[tree]} userLanguage={userLanguage} />
+                        ) : (
+                            <LockedTreePopup treeId={title} coords={trees[tree].coords} />
+                        )}
 
                     </Popup>
                 </Marker>
@@ -120,6 +316,7 @@ function ListMarkers(props) {
     const map = useMap();
     const setWarn = props.warning;
     const userLanguage = props.userLanguage;
+    const { isTreeUnlocked, setYearselected } = useContext(PinContext);
 
     let trees = {};
     if (props.hover !== 0) {
@@ -132,7 +329,7 @@ function ListMarkers(props) {
         }
     }
 
-    let arrTrees = constructJsx(trees, map, ref, userLanguage);
+    let arrTrees = constructJsx(trees, map, ref, userLanguage, isTreeUnlocked, setYearselected);
 
     useEffect(() => {
         if (arrTrees[1] === 0) {
@@ -143,7 +340,7 @@ function ListMarkers(props) {
     });
 
     useMapEvent('drag', () => {
-        let dragTrees = constructJsx(trees, map, ref);
+        let dragTrees = constructJsx(trees, map, ref, userLanguage, isTreeUnlocked, setYearselected);
         if (dragTrees[1] === 0) {
             props.warning(true);
         } else {
@@ -152,7 +349,7 @@ function ListMarkers(props) {
     })
 
     useMapEvent('zoomend', () => {
-        let zoomTrees = constructJsx(trees, map, ref);
+        let zoomTrees = constructJsx(trees, map, ref, userLanguage, isTreeUnlocked, setYearselected);
         if (zoomTrees[1] === 0) {
             props.warning(true);
         } else {
@@ -178,8 +375,20 @@ function MapInitializer({ setMapInstance }) {
     return null;
 }
 
+function PopupStateWatcher({ setPopupOpen }) {
+    useMapEvent('popupopen', () => {
+        setPopupOpen(true);
+    });
+
+    useMapEvent('popupclose', () => {
+        setPopupOpen(false);
+    });
+
+    return null;
+}
+
 const InteractiveMap = () => {
-    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, userPosition, routeToTree, dictionary } = useContext(PinContext);
+    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, userPosition, routeToTree, dictionary, setPopupOpen, modalContent, requestedPopupTreeId, setRequestedPopupTreeId } = useContext(PinContext);
 
     const [divHeight, setDivHeight] = useState(0);
     const markerRef = useRef([]);
@@ -187,18 +396,35 @@ const InteractiveMap = () => {
 
 
     useEffect(() => {
-        if (markerRef && markerRef.current) {
-            if (yearselected === 0) {
-                markerRef.current.forEach(
-                    marker => {
-                        marker.closePopup();
-                    })
-            }
-            if (markerRef.current[yearselected]) {
-                markerRef.current[yearselected].openPopup();
+        if (markerRef && markerRef.current && yearselected === 0) {
+            Object.values(markerRef.current).forEach((marker) => {
+                if (marker) {
+                    marker.closePopup();
+                }
+            });
+        }
+    }, [yearselected]);
+
+    useEffect(() => {
+        if (!requestedPopupTreeId || !mapData.mapObj) {
+            return;
+        }
+
+        const openRequestedPopup = () => {
+            const marker = markerRef.current[requestedPopupTreeId];
+            if (marker) {
+                marker.openPopup();
+                setRequestedPopupTreeId('');
             }
         };
-    }, [markerRef, yearselected]);
+
+        mapData.mapObj.once('moveend', openRequestedPopup);
+        openRequestedPopup();
+
+        return () => {
+            mapData.mapObj.off('moveend', openRequestedPopup);
+        };
+    }, [mapData.mapObj, requestedPopupTreeId, setRequestedPopupTreeId]);
 
 
     const handleResize = useCallback(() => {
@@ -218,7 +444,7 @@ const InteractiveMap = () => {
             <div className="mapContainer" ref={appRef}>
 
                 {dm === true &&
-                    <div className={"modal"}>
+                    <div className={`modal${modalContent === 'intro' ? ' modal--intro' : ''}${modalContent === 'about' ? ' modal--about' : ''}${modalContent === 'tooFar' ? ' modal--compact' : ''}${modalContent === 'treeUnlocked' ? ' modal--unlock' : ''}${modalContent === 'gameVictory' ? ' modal--victory' : ''}${modalContent === 'species' ? ' modal--species' : ''}`}>
                         <Modalcontent />
                     </div>
                 }
@@ -228,6 +454,7 @@ const InteractiveMap = () => {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     <MapInitializer setMapInstance={mapData.setMapObj} />
+                    <PopupStateWatcher setPopupOpen={setPopupOpen} />
 
                     <ListMarkers hover={tmppins} warning={setWarning} askedyear={yearselected} markerRef={markerRef} userLanguage={userLanguage} />
                     {userPosition && (
@@ -241,7 +468,12 @@ const InteractiveMap = () => {
                                 weight: 3
                             }}
                         >
-                            <Popup>{dictionary.nearestTreeYouAreHere || 'You are here'}</Popup>
+                            <Popup className="userLocationPopupWrapper" closeButton={false}>
+                                <div className="userLocationPopup">
+                                    <span className="userLocationPopup__dot" aria-hidden="true" />
+                                    <span className="userLocationPopup__label">{dictionary.nearestTreeYouAreHere || 'You are here'}</span>
+                                </div>
+                            </Popup>
                         </CircleMarker>
                     )}
                     {routeToTree.length > 0 && (

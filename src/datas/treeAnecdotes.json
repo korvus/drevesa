@@ -1,0 +1,343 @@
+[
+  {
+    "id": "sharks-older-than-trees",
+    "category": "prehistory",
+    "text": {
+      "fr": "Les requins sont plus vieux que les arbres: leur lignée remonte à environ 450 millions d'années, alors que les premiers arbres apparaissent vers 385 millions d'années.",
+      "en": "Sharks are older than trees: their lineage goes back about 450 million years, while the first trees appeared around 385 million years ago.",
+      "sl": "Morski psi so starejši od dreves: njihova razvojna linija sega približno 450 milijonov let v preteklost, medtem ko so se prva drevesa pojavila pred približno 385 milijoni let."
+    },
+    "sourceLabel": "Discover Wildlife",
+    "sourceUrl": "https://www.discoverwildlife.com/prehistoric-life/are-sharks-older-than-trees"
+  },
+  {
+    "id": "oldest-living-tree-methuselah",
+    "category": "longevity",
+    "text": {
+      "fr": "Methuselah, un pin Bristlecone de Californie, fait partie des plus vieux arbres non clonaux vivants connus au monde avec environ 4 853 ans.",
+      "en": "Methuselah, a California bristlecone pine, is among the oldest known non-clonal living trees in the world at about 4,853 years old.",
+      "sl": "Metuzalem, ščetinasti bor iz Kalifornije, s približno 4.853 leti spada med najstarejša znana neklonska še živeča drevesa na svetu."
+    },
+    "sourceLabel": "Conservation International",
+    "sourceUrl": "https://www.conservation.org/news/methuselah-still-the-worlds-oldest-tree"
+  },
+  {
+    "id": "old-tjikko-clonal-tree",
+    "category": "longevity",
+    "text": {
+      "fr": "Old Tjikko, en Suède, est surtout remarquable par son système racinaire cloné daté à environ 9 550 ans. Le tronc visible n'a pas cet âge, mais l'ensemble fait partie des plus anciens arbres clonaux connus.",
+      "en": "Old Tjikko in Sweden is best known for its clonal root system, dated to about 9,550 years old. The visible trunk is not that old, but the organism is among the oldest known clonal trees.",
+      "sl": "Old Tjikko na Švedskem je najbolj znan po svojem klonskem koreninskem sistemu, ocenjenem na približno 9.550 let. Vidno deblo ni tako staro, vendar celota spada med najstarejša znana klonska drevesa."
+    },
+    "sourceLabel": "Visit Dalarna",
+    "sourceUrl": "https://www.visitdalarna.se/en/do/attractions/old-tjikko-worlds-oldest-tree"
+  },
+  {
+    "id": "pando-clonal-giant",
+    "category": "longevity",
+    "text": {
+      "fr": "Pando, dans l'Utah, ressemble à une forêt de peupliers faux-trembles, mais il s'agit d'un seul organisme clonal relié par les racines. Ses quelque 47 000 troncs partagent le même système souterrain et son âge est souvent estimé entre 16 000 et 80 000 ans.",
+      "en": "Pando in Utah looks like a forest of quaking aspens, but it is a single clonal organism connected through its roots. Its roughly 47,000 stems share the same underground system, and its age is often estimated at between 16,000 and 80,000 years.",
+      "sl": "Pando v Utahu je videti kot gozd trepetlik, vendar gre za en sam klonski organizem, povezan prek korenin. Njegovih približno 47.000 debel si deli isti podzemni sistem, starost pa pogosto ocenjujejo med 16.000 in 80.000 leti."
+    },
+    "sourceLabel": "Natural History Museum of Utah",
+    "sourceUrl": "https://nhmu.utah.edu/articles/what-oldest-tree-world"
+  },
+  {
+    "id": "oldest-tree-slovenia-larch",
+    "category": "slovenia",
+    "text": {
+      "fr": "L'arbre le plus vieux de Slovénie serait un mélèze de la vallée de Mala Pisnica, généralement estimé entre 800 et 1 000 ans.",
+      "en": "The oldest tree in Slovenia is thought to be a larch in the Mala Pisnica valley, generally estimated to be between 800 and 1,000 years old.",
+      "sl": "Za najstarejše drevo v Sloveniji pogosto velja macesen v dolini Male Pišnice, ki ga običajno ocenjujejo na približno 800 do 1.000 let."
+    },
+    "sourceLabel": "Government Communication Office of Slovenia",
+    "sourceUrl": "https://www.gov.si/assets/vladne-sluzbe/UKOM/Promocija-Slovenije/Sinfo/Sinfo-arhiv/Sinfo-7-8-2019.pdf"
+  },
+  {
+    "id": "oldest-slovenian-yew",
+    "category": "slovenia",
+    "text": {
+      "fr": "À Strane, près de Postojna, pousse l'if slovène le plus célèbre. Les forestiers l'estiment à 500-600 ans, même si la tradition locale lui prête un âge bien plus ancien.",
+      "en": "In Strane near Postojna stands Slovenia's most famous yew. Foresters estimate it to be 500-600 years old, although local tradition gives it a much greater age.",
+      "sl": "V Stranah pri Postojni raste najbolj znana slovenska tisa. Gozdarji njeno starost ocenjujejo na 500-600 let, čeprav ji lokalno izročilo pripisuje precej višjo starost."
+    },
+    "sourceLabel": "Visit Postojna",
+    "sourceUrl": "https://visit-postojna.si/en/najstarejsa-slovenska-tisa/"
+  },
+  {
+    "id": "cadrg-ancient-fir",
+    "category": "slovenia",
+    "text": {
+      "fr": "À Čadrg, en Slovénie, des troncs de sapin conservés dans un sol gorgé d'eau ont été datés à 6 560 ans. Ce ne sont pas des arbres vivants, mais ils rappellent l'ancienneté des forêts du territoire.",
+      "en": "At Čadrg in Slovenia, fir trunks preserved in waterlogged ground were dated to 6,560 years old. They are not living trees, but they are a reminder of how ancient the region's forests are.",
+      "sl": "V Čadrgu v Sloveniji so debla jelk, ohranjena v razmočenih tleh, datirali na 6.560 let. Ne gre za živa drevesa, vendar spominjajo na starodavnost gozdov na tem območju."
+    },
+    "sourceLabel": "Slovenia.si",
+    "sourceUrl": "https://slovenia.si/this-is-slovenia/a-more-than-6500-year-old-fir-from-cadrg"
+  },
+  {
+    "id": "tree-rings-climate-archive",
+    "category": "science",
+    "text": {
+      "fr": "Les cernes des arbres sont de véritables archives climatiques. Ils permettent de reconstituer des sécheresses et d'autres variations du climat bien avant l'existence des stations météo modernes.",
+      "en": "Tree rings are real climate archives. They let scientists reconstruct droughts and other climate variations long before modern weather stations existed.",
+      "sl": "Drevesni letni obroči so pravi podnebni arhivi. Znanstvenikom omogočajo rekonstrukcijo suš in drugih podnebnih sprememb iz časa dolgo pred sodobnimi vremenskimi postajami."
+    },
+    "sourceLabel": "U.S. Geological Survey",
+    "sourceUrl": "https://www.usgs.gov/publications/tree-rings-reveal-unmatched-2nd-century-drought-colorado-river-basin"
+  },
+  {
+    "id": "oak-transpiration",
+    "category": "water-cycle",
+    "text": {
+      "fr": "Un grand chêne mature peut faire circuler puis relâcher dans l'air autour de 150 000 litres d'eau par an par transpiration. Les arbres ne captent donc pas seulement du carbone: ils déplacent aussi d'énormes volumes d'eau et rafraîchissent leur environnement.",
+      "en": "A large mature oak can move and release around 150,000 litres of water into the air each year through transpiration. Trees do not just capture carbon: they also move huge amounts of water and cool their surroundings.",
+      "sl": "Velik zrel hrast lahko s transpiracijo v zrak v enem letu sprosti približno 150.000 litrov vode. Drevesa torej ne zajemajo le ogljika, ampak premikajo tudi ogromne količine vode in hladijo okolico."
+    },
+    "sourceLabel": "California Natural Resources Agency",
+    "sourceUrl": "https://resources.ca.gov/-/media/CNRA-Website/Files/Legal/NOD/202210/30b_20221028_2-22-00121SHA_Official-Response.pdf"
+  },
+  {
+    "id": "forest-bathing-short-term-health",
+    "category": "health",
+    "text": {
+      "fr": "Les études japonaises sur le shinrin-yoku, ou 'bain de forêt', suggèrent des effets physiologiques mesurables à court terme: baisse de la pression artérielle, du rythme cardiaque et de certains marqueurs du stress. Certaines études de Qing Li ont aussi observé une hausse temporaire de l'activité des cellules NK, mais les bénéfices durables restent moins solidement établis que les effets immédiats.",
+      "en": "Japanese studies on shinrin-yoku, or 'forest bathing', suggest measurable short-term physiological effects: lower blood pressure, heart rate, and some stress markers. Some of Qing Li's studies also found a temporary increase in natural killer cell activity, but long-term benefits are less firmly established than the immediate effects.",
+      "sl": "Japonske študije o shinrin-yokuju oziroma 'gozdnem kopanju' kažejo merljive kratkoročne fiziološke učinke: nižji krvni tlak, počasnejši srčni utrip in zmanjšanje nekaterih kazalnikov stresa. Nekatere študije Qing Lija so opazile tudi začasno povečanje aktivnosti celic NK, vendar so dolgotrajne koristi slabše potrjene kot neposredni učinki."
+    },
+    "sourceLabel": "BMC Complementary and Alternative Medicine",
+    "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5559777/"
+  },
+  {
+    "id": "mycorrhizal-networks",
+    "category": "forest-life",
+    "text": {
+      "fr": "Sous la forêt, les racines des arbres peuvent être reliées à des réseaux de champignons mycorhiziens. Ces réseaux améliorent notamment l'accès à l'eau et aux nutriments.",
+      "en": "Below the forest floor, tree roots can be linked by mycorrhizal fungal networks. These networks help improve access to water and nutrients.",
+      "sl": "Pod gozdnimi tlemi so lahko korenine dreves povezane z mrežami mikoriznih gliv. Te mreže pomagajo izboljšati dostop do vode in hranil."
+    },
+    "sourceLabel": "U.S. National Park Service",
+    "sourceUrl": "https://www.nps.gov/muwo/learn/nature/mycorrhizal-relationships.htm"
+  },
+  {
+    "id": "ginkgo-living-fossil",
+    "category": "evolution",
+    "text": {
+      "fr": "Le ginkgo est souvent surnommé un 'fossile vivant': c'est le seul survivant actuel d'un très ancien groupe d'arbres.",
+      "en": "Ginkgo is often nicknamed a 'living fossil': it is the only living survivor of a very ancient group of trees.",
+      "sl": "Ginko pogosto imenujejo 'živi fosil': je edini danes živeči predstavnik zelo stare skupine dreves."
+    },
+    "sourceLabel": "Royal Botanic Gardens, Kew",
+    "sourceUrl": "https://www.kew.org/plants/maidenhair-tree"
+  },
+  {
+    "id": "wollemi-pine-rediscovery",
+    "category": "evolution",
+    "text": {
+      "fr": "Le pin de Wollemi n'était longtemps connu que par les fossiles et semblait perdu depuis des millions d'années, jusqu'à sa redécouverte en Australie en 1994. Il subsiste moins de 100 arbres adultes connus à l'état sauvage.",
+      "en": "The Wollemi pine was long known only from fossils and seemed lost for millions of years until it was rediscovered in Australia in 1994. Fewer than 100 adult trees are known in the wild.",
+      "sl": "Wollemijev bor je bil dolgo znan le po fosilih in je veljal za izgubljenega že milijone let, dokler ga leta 1994 niso znova odkrili v Avstraliji. V naravi je znanih manj kot 100 odraslih dreves."
+    },
+    "sourceLabel": "WollemiPine.com",
+    "sourceUrl": "https://www.wollemipine.com/"
+  },
+  {
+    "id": "before-trees-prototaxites",
+    "category": "prehistory",
+    "text": {
+      "fr": "Avant les premières vraies forêts, la Terre abritait déjà d'étranges organismes géants appelés Prototaxites, qui pouvaient atteindre environ 8 mètres de haut. Une étude de 2007 les a interprétés comme des champignons géants plutôt que comme des arbres.",
+      "en": "Before the first true forests, Earth already had strange giant organisms called Prototaxites that could reach about 8 metres in height. A 2007 study interpreted them as giant fungi rather than trees.",
+      "sl": "Pred prvimi pravimi gozdovi je Zemlja že poznala nenavadne orjaške organizme, imenovane Prototaxites, ki so lahko dosegli približno 8 metrov višine. Študija iz leta 2007 jih je razlagala kot orjaške glive in ne kot drevesa."
+    },
+    "sourceLabel": "ScienceDaily",
+    "sourceUrl": "https://www.sciencedaily.com/releases/2007/04/070423080454.htm"
+  },
+  {
+    "id": "known-tree-species-count",
+    "category": "diversity",
+    "text": {
+      "fr": "Le recensement GlobalTreeSearch a dénombré 60 065 espèces d'arbres connues par la science. Le mot 'arbre' recouvre donc un monde bien plus divers qu'on ne l'imagine souvent.",
+      "en": "The GlobalTreeSearch census counted 60,065 tree species known to science. The world of trees is therefore far more diverse than we often imagine.",
+      "sl": "Popis GlobalTreeSearch je naštel 60.065 drevesnih vrst, znanih znanosti. Svet dreves je torej veliko bolj raznolik, kot si pogosto predstavljamo."
+    },
+    "sourceLabel": "Botanic Gardens Conservation International",
+    "sourceUrl": "https://www.bgci.org/resources/bgci-databases/globaltreesearch/"
+  },
+  {
+    "id": "najevska-linden",
+    "category": "slovenia",
+    "text": {
+      "fr": "La Najevska lipa est le tilleul au tronc le plus imposant de Slovénie. Son âge est estimé autour de 700 ans et elle est devenue un symbole important dans l'histoire slovène contemporaine.",
+      "en": "Najevska lipa is the Slovenian linden with the most massive trunk. Its age is estimated at around 700 years, and it has become an important symbol in modern Slovenian history.",
+      "sl": "Najevska lipa je slovenska lipa z najmogočnejšim deblom. Njena starost je ocenjena na približno 700 let in postala je pomemben simbol sodobne slovenske zgodovine."
+    },
+    "sourceLabel": "Government Communication Office of Slovenia",
+    "sourceUrl": "https://www.gov.si/assets/vladne-sluzbe/UKOM/Promocija-Slovenije/Sinfo/Sinfo-arhiv/Sinfo-7-8-2019.pdf"
+  },
+  {
+    "id": "tallest-tree-species-redwood",
+    "category": "superlative",
+    "text": {
+      "fr": "L'espèce d'arbre la plus haute du monde est le séquoia sempervirent. Certains individus dépassent 106 mètres.",
+      "en": "The tallest tree species in the world is the coast redwood. Some individuals exceed 106 metres.",
+      "sl": "Najvišja drevesna vrsta na svetu je obalni sekvojovec. Nekateri primerki presegajo 106 metrov."
+    },
+    "sourceLabel": "U.S. National Park Service",
+    "sourceUrl": "https://www.nps.gov/articles/000/coast-redwood.htm"
+  },
+  {
+    "id": "greatest-girth-tule-tree",
+    "category": "superlative",
+    "text": {
+      "fr": "L'Arbre du Tule, au Mexique, est souvent mesuré autour de 42 mètres de circonférence. Il est généralement présenté comme le record de circonférence pour un arbre vivant.",
+      "en": "The Tree of Tule in Mexico is often measured at around 42 metres in circumference. It is generally presented as the record-holder for girth among living trees.",
+      "sl": "Drevo Tule v Mehiki pogosto merijo na približno 42 metrov obsega. Običajno velja za rekorderja po obsegu med živimi drevesi."
+    },
+    "sourceLabel": "Oregon State University Extension Service",
+    "sourceUrl": "https://extension.oregonstate.edu/forests/tree-care/americas-largest-diameter-tree"
+  },
+  {
+    "id": "largest-forest-area-country-russia",
+    "category": "forest-area",
+    "text": {
+      "fr": "À l'échelle mondiale, la Russie concentre à elle seule environ un cinquième de la surface forestière de la planète, soit près de 20 % des forêts du monde.",
+      "en": "At the global scale, Russia alone contains about one fifth of the planet's forest area, or roughly 20% of the world's forests.",
+      "sl": "Na svetovni ravni ima sama Rusija približno petino gozdne površine planeta, torej okoli 20 % vseh gozdov na svetu."
+    },
+    "sourceLabel": "Air Pollution & Climate Secretariat citing FAO",
+    "sourceUrl": "https://www.airclim.org/acidnews/quantative-take-russian-forests"
+  },
+  {
+    "id": "forest-coverage-eu-and-sweden",
+    "category": "forest-area",
+    "text": {
+      "fr": "Dans l'Union européenne, la forêt couvre environ 39 % des terres. En Suède, plus de 60 % du territoire est boisé, et la Slovénie dépasse elle aussi les 60 %.",
+      "en": "In the European Union, forests cover about 39% of the land. In Sweden, more than 60% of the territory is forested, and Slovenia is also above 60%.",
+      "sl": "V Evropski uniji gozdovi pokrivajo približno 39 % kopnega. Na Švedskem je z gozdom pokritih več kot 60 % ozemlja, tudi Slovenija pa presega 60 %."
+    },
+    "sourceLabel": "Eurostat",
+    "sourceUrl": "https://ec.europa.eu/eurostat/web/products-eurostat-news/-/edn-20210321-1"
+  },
+  {
+    "id": "redwood-carbon-storage",
+    "category": "carbon",
+    "text": {
+      "fr": "Les forêts anciennes de séquoias de Californie stockent plus de carbone par hectare que n'importe quelle autre forêt connue sur Terre.",
+      "en": "Ancient California redwood forests store more carbon per hectare than any other known forest on Earth.",
+      "sl": "Starodavni gozdovi kalifornijskih sekvoj skladiščijo več ogljika na hektar kot katerikoli drug znani gozd na Zemlji."
+    },
+    "sourceLabel": "Save the Redwoods League",
+    "sourceUrl": "https://www.savetheredwoods.org/redwoods/interactive-redwood-forest-facts/"
+  },
+  {
+    "id": "carbon-species-depends-on-context",
+    "category": "carbon",
+    "text": {
+      "fr": "Il n'existe pas une seule espèce championne du carbone dans toutes les situations. En conditions plus stressantes, certaines espèces dites conservatrices, comme des sapins, des chênes verts, des chênes pubescents ou de nombreux pins, peuvent montrer un fort potentiel de fixation.",
+      "en": "There is no single universal carbon champion among tree species. Under more stressful conditions, some conservative species such as firs, holm oaks, downy oaks, and many pines can show strong carbon-fixing potential.",
+      "sl": "Med drevesnimi vrstami ni enega samega univerzalnega zmagovalca pri ogljiku. V bolj stresnih razmerah lahko nekatere konservativne vrste, kot so jelke, črničevje, puhasti hrasti in številni bori, pokažejo velik potencial za vezavo ogljika."
+    },
+    "sourceLabel": "Forest Research",
+    "sourceUrl": "https://www.forestresearch.gov.uk/news/144298-which-tree-species-fix-the-most-carbon/"
+  },
+  {
+    "id": "urban-trees-property-and-safety",
+    "category": "urban-life",
+    "text": {
+      "fr": "En ville, les arbres sont souvent associés à une hausse de la valeur immobilière et à une baisse de certains délits, mais ces effets dépendent fortement du contexte urbain. Les études du US Forest Service suggèrent par exemple que de grands arbres de rue sont plutôt liés à moins de crimes contre les biens, alors que des arbres denses masquant la vue peuvent parfois produire l'effet inverse.",
+      "en": "In cities, trees are often associated with higher property values and lower levels of some crimes, but these effects depend strongly on the urban context. U.S. Forest Service studies suggest, for example, that large street trees are linked to less property crime, while dense trees that block views can sometimes have the opposite effect.",
+      "sl": "V mestih so drevesa pogosto povezana z višjo vrednostjo nepremičnin in nižjo stopnjo nekaterih kaznivih dejanj, vendar so ti učinki močno odvisni od urbanega okolja. Študije ameriške gozdarske službe na primer kažejo, da so velika obulična drevesa povezana z manj premoženjskega kriminala, medtem ko imajo lahko gosta drevesa, ki zastirajo pogled, včasih nasproten učinek."
+    },
+    "sourceLabel": "U.S. Forest Service",
+    "sourceUrl": "https://research.fs.usda.gov/treesearch/39532"
+  },
+  {
+    "id": "what-makes-a-tree",
+    "category": "botany",
+    "text": {
+      "fr": "Le mot 'arbre' paraît simple, mais il n'a pas de définition botanique parfaitement universelle. En pratique, on désigne le plus souvent une plante vivace ligneuse avec un tronc ou pseudo-tronc et une couronne de branches ou de feuilles.",
+      "en": "The word 'tree' sounds simple, but it does not have a perfectly universal botanical definition. In practice, it usually means a perennial woody plant with a trunk or pseudo-trunk and a crown of branches or leaves.",
+      "sl": "Beseda 'drevo' se zdi preprosta, vendar nima povsem univerzalne botanične definicije. V praksi navadno pomeni večletno lesnato rastlino z deblom ali psevdo-deblom ter krošnjo vej ali listov."
+    },
+    "sourceLabel": "Bernheim Forest and Arboretum",
+    "sourceUrl": "https://bernheim.org/news/what-is-a-tree/"
+  },
+  {
+    "id": "bodhi-tree",
+    "category": "culture",
+    "text": {
+      "fr": "Le figuier des pagodes, ou arbre de la Bodhi, est l'un des arbres les plus célèbres du monde religieux. Selon la tradition bouddhique, c'est sous cet arbre que le Bouddha a atteint l'éveil.",
+      "en": "The sacred fig, or Bodhi Tree, is one of the most famous trees in religious history. According to Buddhist tradition, it was under this tree that the Buddha attained enlightenment.",
+      "sl": "Sveta smokva oziroma drevo bodhi je eno najbolj slavnih dreves v verski zgodovini. Po budističnem izročilu je prav pod tem drevesom Buda dosegel razsvetljenje."
+    },
+    "sourceLabel": "Encyclopaedia Britannica",
+    "sourceUrl": "https://www.britannica.com/topic/bodhi-Buddhism"
+  },
+  {
+    "id": "yggdrasil-world-tree",
+    "category": "mythology",
+    "text": {
+      "fr": "Dans la mythologie nordique, Yggdrasil est le grand frêne cosmique qui soutient l'univers. Il rappelle à quel point les arbres servent souvent d'image pour relier le monde humain, le ciel et l'invisible.",
+      "en": "In Norse mythology, Yggdrasil is the great cosmic ash tree that supports the universe. It shows how often trees symbolize a link between the human world, the sky, and the unseen.",
+      "sl": "V nordijski mitologiji je Yggdrasil veliki kozmični jesen, ki podpira vesolje. Dobro kaže, kako drevesa pogosto simbolizirajo povezavo med človeškim svetom, nebom in nevidnim."
+    },
+    "sourceLabel": "Encyclopaedia Britannica",
+    "sourceUrl": "https://www.britannica.com/topic/Yggdrasill"
+  },
+  {
+    "id": "world-tree-motif",
+    "category": "mythology",
+    "text": {
+      "fr": "L'idée d'un 'arbre du monde' ne se limite pas à la Scandinavie. On retrouve ce motif dans de nombreuses mythologies d'Asie, d'Australie ou d'Amérique du Nord, où l'arbre relie souvent les différents niveaux du cosmos.",
+      "en": "The idea of a 'world tree' is not limited to Scandinavia. It appears in many mythologies across Asia, Australia, and North America, where the tree often links different layers of the cosmos.",
+      "sl": "Zamisel o 'svetovnem drevesu' ni omejena le na Skandinavijo. Pojavlja se v številnih mitologijah Azije, Avstralije in Severne Amerike, kjer drevo pogosto povezuje različne ravni kozmosa."
+    },
+    "sourceLabel": "Encyclopaedia Britannica",
+    "sourceUrl": "https://www.britannica.com/topic/world-tree"
+  },
+  {
+    "id": "tree-of-tenere",
+    "category": "famous-tree",
+    "text": {
+      "fr": "L'Arbre du Ténéré, un acacia du désert nigérien, a longtemps été présenté comme l'arbre le plus isolé du monde. Il servait de repère aux caravanes traversant le Sahara avant d'être renversé en 1973 par un camion.",
+      "en": "The Tree of Ténéré, an acacia in the Nigerien desert, was long described as the most isolated tree in the world. It served as a landmark for caravans crossing the Sahara before being knocked down by a truck in 1973.",
+      "sl": "Drevo Ténéré, akacija v nigrski puščavi, je dolgo veljalo za najbolj osamljeno drevo na svetu. Služilo je kot orientir karavanam, ki so prečkale Saharo, preden ga je leta 1973 podrl tovornjak."
+    },
+    "sourceLabel": "Wikipedia",
+    "sourceUrl": "https://en.wikipedia.org/wiki/Tree_of_T%C3%A9n%C3%A9r%C3%A9"
+  },
+  {
+    "id": "gympie-gympie",
+    "category": "extreme-tree",
+    "text": {
+      "fr": "La Gympie-Gympie, ou Dendrocnide moroides, n'est pas célèbre pour sa taille mais pour sa piqûre. Ce petit arbre ou grand arbuste australien est couvert de poils urticants capables de provoquer une douleur extrêmement intense, parfois durable.",
+      "en": "The Gympie-Gympie, or Dendrocnide moroides, is not famous for its size but for its sting. This small Australian tree or large shrub is covered in stinging hairs that can cause extremely intense pain, sometimes lasting for a long time.",
+      "sl": "Gympie-Gympie oziroma Dendrocnide moroides ni znana po velikosti, temveč po ožigu. To majhno avstralsko drevo oziroma velik grm prekrivajo žgoče dlačice, ki lahko povzročijo izjemno močno in včasih dolgotrajno bolečino."
+    },
+    "sourceLabel": "Queensland State Library",
+    "sourceUrl": "https://www.slq.qld.gov.au/blog/queenslands-gympie-gympie-worlds-most-painful-plant/"
+  },
+  {
+    "id": "manchineel-death-tree",
+    "category": "extreme-tree",
+    "text": {
+      "fr": "Le mancenillier, présent dans les Caraïbes et en Amérique centrale, est souvent décrit comme l'un des arbres les plus toxiques du monde. Sa sève, ses feuilles et ses fruits peuvent provoquer des réactions graves.",
+      "en": "The manchineel tree, found in the Caribbean and Central America, is often described as one of the most poisonous trees in the world. Its sap, leaves, and fruits can cause severe reactions.",
+      "sl": "Manceniljer, ki raste na Karibih in v Srednji Ameriki, pogosto opisujejo kot eno najbolj strupenih dreves na svetu. Njegov sok, listi in plodovi lahko povzročijo hude reakcije."
+    },
+    "sourceLabel": "U.S. Fish & Wildlife Service",
+    "sourceUrl": "https://www.fws.gov/rivers/species/manchineel-hippomane-mancinella"
+  },
+  {
+    "id": "baobab-water-storage",
+    "category": "extreme-tree",
+    "text": {
+      "fr": "Les baobabs sont parfois surnommés 'arbres-bouteilles' parce que leur tronc peut stocker des quantités d'eau considérables, souvent citées jusqu'à environ 120 000 litres selon la taille de l'arbre et les conditions.",
+      "en": "Baobabs are sometimes called 'bottle trees' because their trunks can store very large amounts of water, often cited at up to about 120,000 litres depending on the tree and the conditions.",
+      "sl": "Baobabe včasih imenujejo 'drevesa steklenice', ker lahko njihova debla shranijo ogromne količine vode, pogosto se navaja do približno 120.000 litrov, odvisno od drevesa in razmer."
+    },
+    "sourceLabel": "National Geographic",
+    "sourceUrl": "https://www.nationalgeographic.com/animals/article/baobabs"
+  }
+]

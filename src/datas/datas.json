@@ -2,7 +2,7 @@
     "2019": [
         {
             "name": "sycamore",
-            "adresse": "https://www.google.com/maps/@46.0485635,14.512528,3a,75y,23.21h,110.13t/data=!3m7!1e1!3m5!1sBZJ_A41SlO2TgsL6CzRI3A!2e0!6shttps:%2F%2Fstreetviewpixels-pa.googleapis.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D-20.129440442823622%26panoid%3DBZJ_A41SlO2TgsL6CzRI3A%26yaw%3D23.20830350160044!7i16384!8i8192?entry=ttu&g_ep=EgoyMDI2MDMxNS4wIKXMDSoASAFQAw%3D%3D",
+            "adresse": "https://maps.apple.com/look-around?address=Strossmayerjeva+ulica%2C+1000+Ljubljana%2C+Slov%C3%A9nie&coordinate=46.048474%2C14.512634&name=Strossmayerjeva+ulica&_mvs=Ci0J7AH9sjQGR0ARFqh4RXYGLUAZAIAgLSBzdUAhp1tyMi4OdkAp1HFidI0TL8A%3D",
             "icon": "tree1",
             "iconinactive": "tree1inactive",
             "coords": [
@@ -14,19 +14,19 @@
     "2020": [
         {
             "name": "weeping_beech",
-            "adresse": "https://www.google.com/maps/@46.0684739,14.4843797,3a,75y,238.39h,104.88t/data=!3m6!1e1!3m4!1sysrrkqFzrRtRcCtr5vhO4g!2e0!7i16384!8i8192",
+            "adresse": "https://maps.apple.com/look-around?address=Vodnikova+cesta+90%2C+1000+Ljubljana%2C+Slov%C3%A9nie&coordinate=46.068670%2C14.484190&name=Vodnikova+cesta+90&_mvs=CiQJtyrZB8UIR0ARCzgOdfP3LEAZAECEmGAEdkAhABJs3M8%2FQ0A%3D",
             "icon": "tree2",
             "iconinactive": "tree2inactive",
             "coords": [
-                46.068336,
-                14.4818255
+                46.068455431913684,
+                14.484243137293756
             ]
         }
     ],
     "2021": [
         {
             "name": "Caucasian_wingnut",
-            "adresse": " https://www.google.com/maps/@46.0658355,14.5226392,3a,75y,157.1h,93.77t/data=!3m6!1e1!3m4!1sQwu5V1rghFnR_LVI3rNo0g!2e0!7i13312!8i6656",
+            "adresse": "https://maps.apple.com/look-around?address=Linhartova+cesta+70%2C+1000+Ljubljana%2C+Slov%C3%A9nie&coordinate=46.065580%2C14.522880&name=Linhartova+cesta+70&_mvs=Ci0JAkWNDW4IR0AR%2F56VjI0LLUAZAMCzaqajdUAh70F%2FkbePYUApMD02vkO8IsA%3D",
             "icon": "tree1",
             "iconinactive": "tree1inactive",
             "coords": [
@@ -38,7 +38,7 @@
     "2022": [
         {
             "name": "Persian_ironwood",
-            "adresse": "https://www.google.com/maps/@46.0547353,14.5255121,3a,48.5y,192.18h,103.69t/data=!3m6!1e1!3m4!1sBUYTFQoVuBUqFNypnQ-apQ!2e0!7i16384!8i8192",
+            "adresse": "https://maps.apple.com/look-around?address=%C5%A0lajmerjeva+ulica+8%2C+1000+Ljubljana%2C+Slov%C3%A9nie&coordinate=46.054720%2C14.525960&name=%C5%A0lajmerjeva+ulica+8&_mvs=Ci0J2CB02gAHR0AR8hdfuA8NLUAZAEBso1UPdUAhzWPkUKl0ZkApM3bcactwL8A%3D",
             "icon": "tree3",
             "iconinactive": "tree3inactive",
             "coords": [
@@ -50,7 +50,7 @@
     "2023": [
         {
             "name": "Japanese_cherries",
-            "adresse": "https://www.google.com/maps/place/Alja%C5%BEeva+ulica,+1000+Ljubljana/@46.0688015,14.4918455,17z/data=!4m15!1m8!3m7!1s0x476532ba44fc37a3:0xcddc83438c5e8b62!2sAlja%C5%BEeva+ulica,+1000+Ljubljana!3b1!8m2!3d46.0679436!4d14.4950909!16s%2Fg%2F122kznq1!3m5!1s0x476532ba44fc37a3:0xcddc83438c5e8b62!8m2!3d46.0679436!4d14.4950909!16s%2Fg%2F122kznq1?entry=ttu&g_ep=EgoyMDI1MTAxMi4wIKXMDSoASAFQAw%3D%3D",
+            "adresse": "https://maps.apple.com/look-around?address=Alja%C5%BEeva+ulica+7-19%2C+1000+Ljubljana%2C+Slov%C3%A9nie&coordinate=46.065390%2C14.494215&name=Alja%C5%BEeva+ulica+7%E2%80%9319&_mvs=Ci0JGOEmtF4IR0AR9kOmlwn9LEAZAMDbZvvzdUAhKkr%2FUrNiI0ApWOJS%2FhRj6r8%3D",
             "icon": "tree4",
             "iconinactive": "tree4inactive",
             "coords": [
@@ -62,7 +62,7 @@
     "2024": [
         {
             "name": "ginkgo",
-            "adresse": "https://www.google.com/maps/@46.0520805,14.5003385,21z",
+            "adresse": "https://maps.apple.com/look-around?address=Trg+Narodnih+Herojev%2C+1000+Ljubljana%2C+Slov%C3%A9nie&coordinate=46.052151%2C14.500906&name=Trg+Narodnih+Herojev&_mvs=Ci0J664%2Fc6wGR0ARTHEeoXcALUAZAEAi9nmidUAhHmd4zdzjcEAps7jsE7rGLMA%3D",
             "icon": "tree5",
             "iconinactive": "tree5inactive",
             "coords": [

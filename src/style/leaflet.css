@@ -8,52 +8,114 @@
     z-index: 0;
 }
 
+.leaflet-popup-pane {
+    z-index: 1100;
+}
+
 .leaflet-div-icon {
     border: none;
     background-color: transparent;
 }
 
 .leaflet-popup {
-    width: 350px;
+    width: auto;
+    max-width: min(316px, calc(100vw - 40px));
     font-size: 16px;
 }
 
 .leaflet-popup-content {
-    margin: 30px 19px 13px;
+    margin: 0 !important;
+    width: auto !important;
+    padding-bottom: 10px;
+    min-width: 290px;
 }
 
 .leaflet-control {
     width: auto;
 }
 
-.leaflet-popup-content span.title {
+.leaflet-popup-content > span.title,
+.leaflet-popup-content .gamePopup > span.title {
     font-size: 18px;
     display: block;
-    border-bottom: 1px solid #999;
-    margin-bottom: 1rem;
+    border-bottom: 1px solid #b7c4b2;
+    margin: 0;
     font-weight: bold;
-    text-indent: 20px;
-    padding: 20px 0 20px 0;
+    text-indent: 0;
+    padding: 20px 22px;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
     color: #178040;
     background: #add19e;
     background: linear-gradient(90deg, #add190 33%, #e8e8e0 100%);
 }
 
-.leaflet-popup-content strong span {
-    font-size: 14px;
-    display: block;
-    font-weight: normal;
-}
-
-.leaflet-popup-content strong a {
-    color: #178040;
-}
-
-
 .leaflet-popup .leaflet-popup-content-wrapper,
 .leaflet-popup .leaflet-popup-tip {
     border: 1px solid #178040;
     background: #e8e8e5;
+}
+
+.leaflet-popup .leaflet-popup-content-wrapper {
+    padding: 0;
+    overflow: hidden;
+}
+
+.leaflet-popup-content .gamePopup > :not(.title) {
+    margin-left: 22px;
+    margin-right: 18px;
+}
+
+.leaflet-popup-content .gamePopup--next > :not(.title) {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.leaflet-popup-content .unlockedPopupBody {
+    padding: 16px 18px 4px;
+}
+
+.leaflet-popup-content .popupField {
+    margin-top: 1.2rem;
+}
+
+.leaflet-popup-content .popupField:first-child {
+    margin-top: 0;
+}
+
+.leaflet-popup-content .popupField--species {
+    margin-top: 0;
+}
+
+.leaflet-popup-content .popupFieldLabel {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: #494f4c;
+    margin-bottom: 0.4rem;
+}
+
+.leaflet-popup-content .popupFieldValue {
+    font-size: 1.7rem;
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+.leaflet-popup-content .popupField--address {
+    margin: 1.4rem -18px 0;
+    padding: 1.3rem 18px 1.4rem;
+    background: rgba(173, 209, 158, 0.2);
+    border-top: 1px solid rgba(23, 128, 64, 0.12);
+    border-bottom: 1px solid rgba(23, 128, 64, 0.12);
+    border-radius: 0;
+}
+
+.leaflet-popup-content .popupField--address .popupFieldLabel {
+    margin-bottom: 0.5rem;
+}
+
+.leaflet-popup-content .popupFieldValue > a {
+    color: #178040;
 }
 
 .leaflet-popup-content address {
@@ -66,4 +128,86 @@
     color: #a5a5a3;
     font-style: normal;
     font-size: 12px;
+}
+
+.leaflet-popup.userLocationPopupWrapper {
+    max-width: min(220px, calc(100vw - 40px));
+}
+
+.leaflet-popup.userLocationPopupWrapper .leaflet-popup-content {
+    min-width: 0;
+    padding-bottom: 0;
+}
+
+.leaflet-popup.userLocationPopupWrapper .leaflet-popup-content-wrapper,
+.leaflet-popup.userLocationPopupWrapper .leaflet-popup-tip {
+    border: 1px solid rgba(23, 128, 64, 0.35);
+    background: rgba(232, 232, 229, 0.96);
+    box-shadow: 0 8px 24px rgba(15, 64, 33, 0.14);
+}
+
+.leaflet-popup.userLocationPopupWrapper .leaflet-popup-content-wrapper {
+    border-radius: 999px;
+}
+
+.userLocationPopup {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem 1.4rem;
+    color: #1a3322;
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.userLocationPopup__dot {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #178040;
+    box-shadow: 0 0 0 4px rgba(23, 128, 64, 0.15);
+    flex: 0 0 auto;
+}
+
+.userLocationPopup__label {
+    white-space: nowrap;
+}
+
+@media screen and (max-width: 767px) {
+    .leaflet-popup-content {
+        min-width: 0;
+    }
+
+    .leaflet-popup-content > span.title,
+    .leaflet-popup-content .gamePopup > span.title {
+        padding: 18px 18px 16px;
+    }
+
+    .leaflet-popup-content .gamePopup > :not(.title) {
+        margin-left: 18px;
+        margin-right: 18px;
+    }
+
+    .leaflet-popup-content .gamePopup--next > :not(.title) {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .leaflet-popup-content .unlockedPopupBody {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .leaflet-popup-content .popupField--address {
+        margin-left: -18px;
+        margin-right: -18px;
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .userLocationPopup {
+        padding: 0.9rem 1.2rem;
+        font-size: 1.5rem;
+    }
 }

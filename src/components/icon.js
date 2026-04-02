@@ -8,6 +8,7 @@ import treeTwoInactive from "../img/tree2inactive.png";
 import treeThreeInactive from "../img/tree3inactive.png";
 import treeFourInactive from "../img/tree4inactive.png";
 import treeFiveInactive from "../img/tree5inactive.png";
+import questionMarkTree from "../img/iconQuestionMarkTree.png";
 
 import L from "leaflet";
 
@@ -25,6 +26,7 @@ const iconDefinitions = {
   tree4inactive: { src: treeFourInactive, size: [42, 52], anchor: [33, 41] },
   tree5: { src: treeFive, size: [42, 52], anchor: [33, 41] },
   tree5inactive: { src: treeFiveInactive, size: [42, 52], anchor: [33, 41] },
+  questionMarkTree: { src: questionMarkTree, size: [42, 52], anchor: [33, 41] },
 };
 
 const icons = Object.keys(iconDefinitions).reduce((acc, key) => {
