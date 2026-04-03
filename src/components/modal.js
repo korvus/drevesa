@@ -4,8 +4,9 @@ import { PinContext, Text } from '../store';
 import carteExplication from '../img/carteExplication.png';
 import herbierOuvert from '../img/herbierOuvert.png';
 import herbierFerme from '../img/herbierFerme.png';
+import treasure from '../img/treasure.png';
 import speciesDetails from '../datas/speciesDetails.js';
-import { getRandomTreeAnecdote } from '../datas/treeAnecdotes.js';
+import treeAnecdotes, { getLocalizedTreeAnecdote, getRandomTreeAnecdote } from '../datas/treeAnecdotes.js';
 import reward2019 from '../img/rewards/reward2019.png';
 import reward2020 from '../img/rewards/reward2020.png';
 import reward2021 from '../img/rewards/reward2021.png';
@@ -37,6 +38,13 @@ const Modalcontent = () => {
 
         return getRandomTreeAnecdote(userLanguage);
     }, [modalContent, selectedSpeciesId, userLanguage]);
+    const localizedTreeAnecdotes = useMemo(() => {
+        if (modalContent !== 'treasure') {
+            return [];
+        }
+
+        return treeAnecdotes.map((anecdote) => getLocalizedTreeAnecdote(anecdote, userLanguage));
+    }, [modalContent, userLanguage]);
 
     return (
         <div className="innerModal">
@@ -232,6 +240,32 @@ const Modalcontent = () => {
                                         </li>
                                     ))}
                                 </ul>
+                            </div>
+                        </div>
+                    </>
+                }
+                {modalContent === "treasure" &&
+                    <>
+                        <div className="treasureCopy">
+                            <div className="treasureHero">
+                                <img src={treasure} alt="" />
+                            </div>
+                            <h2><Text tid="gameTreasureModalTitle" /></h2>
+                            <p className="treasureLead"><Text tid="gameTreasureModalLead" /></p>
+                            <div className="treasureAnecdotes">
+                                {localizedTreeAnecdotes.map((anecdote) => (
+                                    <article key={anecdote.id} className="treasureAnecdoteCard">
+                                        <p>{anecdote.text}</p>
+                                        <a
+                                            className="externalLink treasureAnecdoteSource"
+                                            rel="noreferrer"
+                                            target="_blank"
+                                            href={anecdote.sourceUrl}
+                                        >
+                                            {anecdote.sourceLabel || dictionary.speciesTriviaSource}
+                                        </a>
+                                    </article>
+                                ))}
                             </div>
                         </div>
                     </>

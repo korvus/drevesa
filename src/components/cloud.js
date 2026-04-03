@@ -1,6 +1,8 @@
 import { useSprings, animated } from 'react-spring';
 import { memo } from 'react';
 
+const CLOUD_HEIGHT = 84;
+
 function calculateTime(speed, distance) {
     return Math.round((distance / speed) * 1000);
 }
@@ -31,7 +33,7 @@ const Cloud = memo(({ widthContainer, heightContainer }) => {
         }),
     );
 
-    const randomTop = () => randomNumber(0, heightContainer);
+    const randomTop = () => randomNumber(0, Math.max(0, heightContainer - CLOUD_HEIGHT));
 
     return <div className="wrapperAnims">
         {springs.map((props, i) => (

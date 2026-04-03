@@ -3,6 +3,8 @@ import trees from "../datas/datas.json";
 import { PinContext, Text } from "../store";
 import LanguageSelector from './languageSelector.js';
 import badge from '../img/badge.png';
+import coupe from '../img/coupe.png';
+import treasure from '../img/treasure.png';
 
 
 const listDate = Object.keys(trees);
@@ -177,7 +179,7 @@ const ListByYears = (props) => {
 
 const Col = () => {
     const [circles, setCircles] = useState([]);
-    const { setDm, dm, setYearselected, setShowClouds, showClouds, setModalContent, setTmppins, yearselected, mapData, dictionary, userLanguage, popupOpen, nearestTree, nearestTreeState, locateNearestTree, focusAllTrees } = useContext(PinContext);
+    const { setDm, dm, setYearselected, setShowClouds, showClouds, setModalContent, setTmppins, yearselected, mapData, dictionary, userLanguage, popupOpen, nearestTree, nearestTreeState, locateNearestTree, focusAllTrees, isTreeUnlocked, guidedTreeId } = useContext(PinContext);
 
     const escFunction = useCallback((event) => {
         if (event.keyCode === 27) {
@@ -209,17 +211,33 @@ const Col = () => {
     const nearestTreeLabel = nearestTree ? (dictionary[`adrs${nearestTree.year}`] || nearestTree.year) : '';
     const nearestTreeSummary = renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, userLanguage);
     const nearestTreeFeedback = renderNearestTreeFeedbackContent(nearestTreeState, nearestTree, nearestTreeSummary);
+    const hasUnlockedEveryTree = listDate.every((year) => isTreeUnlocked(year));
     const handleBadgeClick = () => {
         setYearselected(0);
         setTmppins(0);
         focusAllTrees();
+    };
+    const handleOpenTreasure = () => {
+        setModalContent('treasure');
+        if (!dm) {
+            setDm(true);
+        }
     };
 
 
     return (
         <>
             <div className="pannel">
-                <LanguageSelector />
+                <div className="panelMetaRow">
+                    <LanguageSelector />
+                    <button
+                        type="button"
+                        className="panelContactMobile"
+                        onClick={() => { setModalContent('contact'); if (!dm) setDm(true) }}
+                    >
+                        <Text tid="contact" />
+                    </button>
+                </div>
 
                 <h1 onClick={() => { setModalContent('about'); if (!dm) setDm(true) }}>
                     <Text tid="titre" />
@@ -230,27 +248,42 @@ const Col = () => {
                     type="button"
                     className="badgeWrapper"
                     onClick={handleBadgeClick}
-                    title={dictionary.mapResetViewAction || 'Show all trees'}
-                    aria-label={dictionary.mapResetViewAction || 'Show all trees'}
+                    title={hasUnlockedEveryTree ? (dictionary.gameWonBadgeTitle || 'Well done, you discovered every tree') : (dictionary.mapResetViewAction || 'Show all trees')}
+                    aria-label={hasUnlockedEveryTree ? (dictionary.gameWonBadgeTitle || 'Well done, you discovered every tree') : (dictionary.mapResetViewAction || 'Show all trees')}
                 >
                     <img src={badge} alt="Ljubljana tree badge" />
+                    {hasUnlockedEveryTree && (
+                        <img className="badgeWrapper__cup" src={coupe} alt="" aria-hidden="true" />
+                    )}
                 </button>
 
                 <div className="content">
                     <ListByYears actions={[setYearselected, yearselected, mapData]} hover={setTmppins} />
                     <div className="nearestTreeCard">
-                        <button type="button" className="nearestTreeButton nearestTreeButton--panel" onClick={locateNearestTree}>
-                            {nearestTreeState === 'loading' ? <Text tid="nearestTreeLoading" /> : <Text tid="nearestTreeAction" />}
-                        </button>
-                        <div className="nearestTreeFeedback nearestTreeFeedback--panel">
-                            {nearestTreeFeedback}
-                        </div>
+                        {hasUnlockedEveryTree ? (
+                            <button type="button" className="treasurePanelLink" onClick={handleOpenTreasure}>
+                                <img src={treasure} alt="" aria-hidden="true" />
+                                <span className="treasurePanelLink__text">
+                                    <strong><Text tid="gameTreasurePanelTitle" /></strong>
+                                    <span><Text tid="gameTreasurePanelBody" /></span>
+                                </span>
+                            </button>
+                        ) : (
+                            <>
+                                <button type="button" className="nearestTreeButton nearestTreeButton--panel" onClick={locateNearestTree}>
+                                    {nearestTreeState === 'loading' ? <Text tid="nearestTreeLoading" /> : <Text tid="nearestTreeAction" />}
+                                </button>
+                                <div className="nearestTreeFeedback nearestTreeFeedback--panel">
+                                    {!guidedTreeId && nearestTreeFeedback}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
 
                 <div className="menu">
-                    <span onClick={() => { setModalContent('contact'); if (!dm) setDm(true) }}><Text tid="contact" /></span>
+                    <span className="panelContactDesktop" onClick={() => { setModalContent('contact'); if (!dm) setDm(true) }}><Text tid="contact" /></span>
                     <span onClick={() => { setShowClouds(!showClouds) }} className={`cloudTrigger ${showClouds ? 'active' : 'inactif'}`}></span>
                 </div>
 
@@ -266,7 +299,7 @@ const Col = () => {
                     <WalkingIcon />
                 </button>
             )}
-            {!dm && nearestTreeFeedback && (
+            {!dm && !hasUnlockedEveryTree && !guidedTreeId && nearestTreeFeedback && (
                 <div className="nearestTreeFeedback nearestTreeFeedback--floating">
                     {nearestTreeFeedback}
                 </div>

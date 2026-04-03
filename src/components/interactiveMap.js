@@ -17,10 +17,25 @@ import { useEffect, useRef, useContext, useState, useCallback } from "react";
 import { getIcon } from '../components/icon.js';
 import speciesDetails from '../datas/speciesDetails.js';
 import herbierFerme from '../img/herbierFerme.png';
+import treasure from '../img/treasure.png';
+import carteExplication from '../img/carteExplication.png';
 
 const Ljubljana = [46.0507666, 14.5047565];
 const listDate = Object.keys(coords);
 const GAME_DISTANCE_THRESHOLD_METERS = 20;
+
+function WalkingIcon() {
+    return (
+        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+            <circle cx="32" cy="11" r="5" />
+            <path d="M32 19v14" />
+            <path d="M32 24l-10 8" />
+            <path d="M32 24l10 6" />
+            <path d="M32 33l-8 17" />
+            <path d="M32 33l9 18" />
+        </svg>
+    );
+}
 
 function haversineDistanceInMeters(fromCoords, toCoords) {
     const toRadians = (degrees) => (degrees * Math.PI) / 180;
@@ -40,12 +55,13 @@ function haversineDistanceInMeters(fromCoords, toCoords) {
 }
 
 function LockedTreePopup({ treeId, coords }) {
-    const { userPosition, setUserPosition, unlockTree } = useContext(PinContext);
+    const { userPosition, setUserPosition, unlockTree, guidedTreeId, mapData } = useContext(PinContext);
     const [distanceInMeters, setDistanceInMeters] = useState(null);
     const [geoStatus, setGeoStatus] = useState('idle');
     const watchIdRef = useRef(null);
     const lastPositionRef = useRef(null);
     const lastUpdateTsRef = useRef(0);
+    const isGuidedTree = guidedTreeId === treeId;
 
     useEffect(() => {
         if (!userPosition) {
@@ -57,6 +73,9 @@ function LockedTreePopup({ treeId, coords }) {
     }, [coords, userPosition]);
 
     const isNearby = distanceInMeters !== null && distanceInMeters <= GAME_DISTANCE_THRESHOLD_METERS;
+    const estimatedWalkingMinutes = distanceInMeters !== null
+        ? Math.max(1, Math.round(((distanceInMeters / 1000) / 4.8) * 60))
+        : null;
 
     useEffect(() => {
         if (!navigator.geolocation) {
@@ -130,24 +149,49 @@ function LockedTreePopup({ treeId, coords }) {
         );
     };
 
+    const handleGoThere = () => {
+        if (!mapData.mapObj) {
+            return;
+        }
+
+        if (userPosition) {
+            mapData.mapObj.closePopup();
+            mapData.mapObj.flyTo(userPosition, 17);
+            return;
+        }
+
+        mapData.mapObj.closePopup();
+        mapData.mapObj.flyTo(coords, 17);
+    };
+
     return (
         <div className="gamePopup">
             <span className="title">{treeId}</span>
             <p><Text tid="gameLockedIntro" /></p>
             {distanceInMeters !== null && (
-                <p>
+                <p className="popupMetric">
                     <Text tid="gameLockedDistance" /> {distanceInMeters} m.
                 </p>
+            )}
+            {estimatedWalkingMinutes !== null && (
+                <p className="popupMetric">
+                    <Text tid="gameLockedDuration" /> {estimatedWalkingMinutes} <Text tid="nearestTreeMinutes" />.
+                </p>
+            )}
+            {isGuidedTree && !isNearby && (
+                <button type="button" className="gamePopupButton gamePopupButton--secondary" onClick={handleGoThere}>
+                    <Text tid="gameGoThere" />
+                </button>
             )}
             {isNearby ? (
                 <button type="button" className="gamePopupButton" onClick={() => unlockTree(treeId)}>
                     <Text tid="gameUnlockCta" />
                 </button>
-            ) : (
+            ) : !isGuidedTree ? (
                 <button type="button" className="gamePopupButton gamePopupButton--secondary" onClick={handleUseLocation}>
                     {geoStatus === 'loading' ? <Text tid="nearestTreeLoading" /> : <Text tid="gameUseLocation" />}
                 </button>
-            )}
+            ) : null}
             {distanceInMeters !== null && !isNearby && (
                 <p><Text tid="gameNeedCloser" /></p>
             )}
@@ -158,7 +202,7 @@ function LockedTreePopup({ treeId, coords }) {
 }
 
 function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
-    const { traceNextLockedTreeFrom, openSpeciesModal, dictionary, isTreeUnlocked } = useContext(PinContext);
+    const { traceNextLockedTreeFrom, openSpeciesModal, dictionary, isTreeUnlocked, setModalContent, setDm } = useContext(PinContext);
     const [traceState, setTraceState] = useState('idle');
     const speciesData = speciesDetails[treeData.name];
     const hasRemainingLockedTrees = listDate.some((year) => !isTreeUnlocked(year));
@@ -167,6 +211,11 @@ function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
         setTraceState('loading');
         const nextTree = await traceNextLockedTreeFrom(treeId);
         setTraceState(nextTree ? 'ready' : 'done');
+    };
+
+    const handleOpenTreasure = () => {
+        setModalContent('treasure');
+        setDm(true);
     };
 
     return (
@@ -195,11 +244,12 @@ function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
                     <span className="popupFieldLabel"><Text tid='address' /></span>
                     <div className="popupFieldValue">
                         <a
-                            className="externalLink"
+                            className="externalLink popupAddressLink"
                             rel="noreferrer"
                             target="_blank"
                             href={treeData.adresse}
                         >
+                            <img className="popupAddressIcon" src={carteExplication} alt="" aria-hidden="true" />
                             <Text tid={`adrs${treeId}`} />
                         </a>
                     </div>
@@ -217,7 +267,10 @@ function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
                         )}
                     </>
                 ) : (
-                    <p><Text tid="gameAllTreesUnlocked" /></p>
+                    <button type="button" className="treasureLink" onClick={handleOpenTreasure}>
+                        <img src={treasure} alt="" aria-hidden="true" />
+                        <span><Text tid="gameTreasureAction" /></span>
+                    </button>
                 )}
             </div>
         </>
@@ -388,7 +441,7 @@ function PopupStateWatcher({ setPopupOpen }) {
 }
 
 const InteractiveMap = () => {
-    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, userPosition, routeToTree, dictionary, setPopupOpen, modalContent, requestedPopupTreeId, setRequestedPopupTreeId } = useContext(PinContext);
+    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, setShowClouds, userPosition, routeToTree, dictionary, setPopupOpen, modalContent, requestedPopupTreeId, setRequestedPopupTreeId, popupOpen, locateNearestTree, hasUnlockedEveryTree } = useContext(PinContext);
 
     const [divHeight, setDivHeight] = useState(0);
     const markerRef = useRef([]);
@@ -438,17 +491,47 @@ const InteractiveMap = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, [handleResize, setDivWidth]);
 
+    useEffect(() => {
+        if (!mapData.mapObj) {
+            return undefined;
+        }
+
+        const timeoutId = window.setTimeout(() => {
+            mapData.mapObj.invalidateSize(false);
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [mapData.mapObj, divWidth, divHeight]);
+
     return (
         <div className="App">
             {(divWidth > 0 && showClouds) && <Cloud widthContainer={divWidth} heightContainer={divHeight} />}
             <div className="mapContainer" ref={appRef}>
+                <button
+                    type="button"
+                    className={`mapCloudTrigger ${showClouds ? 'active' : 'inactif'}`}
+                    onClick={() => setShowClouds(!showClouds)}
+                    aria-label={showClouds ? 'Hide clouds' : 'Show clouds'}
+                    title={showClouds ? 'Hide clouds' : 'Show clouds'}
+                />
+                {!dm && !popupOpen && hasUnlockedEveryTree && (
+                    <button
+                        type="button"
+                        className="nearestTreeButton nearestTreeButton--desktopOverlay"
+                        onClick={locateNearestTree}
+                        aria-label={dictionary.nearestTreeAction || 'Find the nearest tree'}
+                        title={dictionary.nearestTreeAction || 'Find the nearest tree'}
+                    >
+                        <WalkingIcon />
+                    </button>
+                )}
 
                 {dm === true &&
-                    <div className={`modal${modalContent === 'intro' ? ' modal--intro' : ''}${modalContent === 'about' ? ' modal--about' : ''}${modalContent === 'tooFar' ? ' modal--compact' : ''}${modalContent === 'treeUnlocked' ? ' modal--unlock' : ''}${modalContent === 'gameVictory' ? ' modal--victory' : ''}${modalContent === 'species' ? ' modal--species' : ''}`}>
+                    <div className={`modal${modalContent === 'intro' ? ' modal--intro' : ''}${modalContent === 'about' ? ' modal--about' : ''}${modalContent === 'tooFar' ? ' modal--compact' : ''}${modalContent === 'treeUnlocked' ? ' modal--unlock' : ''}${modalContent === 'gameVictory' ? ' modal--victory' : ''}${modalContent === 'species' ? ' modal--species' : ''}${modalContent === 'treasure' ? ' modal--treasure' : ''}`}>
                         <Modalcontent />
                     </div>
                 }
-                <MapContainer center={Ljubljana} zoom={13} scrollWheelZoom={false} tap={false}>
+                <MapContainer center={Ljubljana} zoom={13} scrollWheelZoom={true} tap={false}>
                     <TileLayer
                         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

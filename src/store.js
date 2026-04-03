@@ -204,6 +204,7 @@ export const PinContextProvider = props => {
     const [celebrationKey, setCelebrationKey] = useState(0);
     const [recentlyUnlockedTreeId, setRecentlyUnlockedTreeId] = useState('');
     const [selectedSpeciesId, setSelectedSpeciesId] = useState('');
+    const [guidedTreeId, setGuidedTreeId] = useState('');
 
     const [mapObj, setMapObj] = useState(null);
     const goToArea = (regionCoord, zoom = 13) => {
@@ -307,6 +308,7 @@ export const PinContextProvider = props => {
             const hasUnlockedEveryTree = nextUnlockedTrees.length >= TOTAL_TREE_COUNT;
             persistGameState({ unlockedTrees: nextUnlockedTrees, unlockAllTrees });
             setRecentlyUnlockedTreeId(treeId);
+            setGuidedTreeId('');
             setModalContent(hasUnlockedEveryTree ? 'gameVictory' : 'treeUnlocked');
             setDm(true);
             if (hasUnlockedEveryTree) {
@@ -331,6 +333,7 @@ export const PinContextProvider = props => {
     };
 
     const isTreeUnlocked = (treeId) => unlockAllTrees || unlockedTrees.includes(treeId);
+    const hasUnlockedEveryTree = unlockAllTrees || unlockedTrees.length >= TOTAL_TREE_COUNT;
 
     const openSpeciesModal = useCallback((speciesId) => {
         if (!speciesId) {
@@ -361,10 +364,12 @@ export const PinContextProvider = props => {
             setRouteMeta(null);
             setYearselected(0);
             setRequestedPopupTreeId('');
+            setGuidedTreeId('');
             return null;
         }
 
         setNextTreeSuggestion(nextTree);
+        setGuidedTreeId(nextTree.year);
         setYearselected(nextTree.year);
         setRequestedPopupTreeId(nextTree.year);
 
@@ -378,98 +383,134 @@ export const PinContextProvider = props => {
                 startSnapDistanceInMeters: route.startSnapDistanceInMeters,
                 endSnapDistanceInMeters: route.endSnapDistanceInMeters
             });
+
+            if (mapObj) {
+                mapObj.flyToBounds([route.snappedStart, nextTree.coords], {
+                    padding: [60, 60],
+                    maxZoom: 16
+                });
+            }
         } catch (error) {
             setRouteToTree([]);
             setRouteMeta(null);
-        }
-
-        if (mapObj) {
-            mapObj.flyTo(nextTree.coords, 16);
+            if (mapObj) {
+                mapObj.flyToBounds([currentPosition, nextTree.coords], {
+                    padding: [60, 60],
+                    maxZoom: 16
+                });
+            }
         }
 
         return nextTree;
     }, [mapObj, unlockAllTrees, unlockedTrees, userPosition]);
 
     const locateNearestTree = useCallback(() => {
-        if (!navigator.geolocation) {
-            setNearestTree(null);
-            setNearestTreeState('unsupported');
-            setUserPosition(null);
-            setRouteToTree([]);
-            setRouteMeta(null);
-            return;
+        setNextTreeSuggestion(null);
+        setNearestTreeState('loading');
+        setYearselected(0);
+        setRequestedPopupTreeId('');
+        setGuidedTreeId('');
+        if (mapObj) {
+            mapObj.closePopup();
         }
 
-        setNearestTreeState('loading');
+        const proceedWithPosition = async (currentUserPosition) => {
+            const closest = findNearestTree(currentUserPosition);
+
+            if (!closest) {
+                setNearestTree(null);
+                setNearestTreeState('error');
+                setUserPosition(currentUserPosition);
+                setRouteToTree([]);
+                setRouteMeta(null);
+                setYearselected(0);
+                setRequestedPopupTreeId('');
+                return;
+            }
+
+            setUserPosition(currentUserPosition);
+
+            if (closest.walkingTimeInMinutes > MAX_WALKING_TIME_MINUTES) {
+                setNearestTree(closest);
+                setRouteToTree([]);
+                setRouteMeta(null);
+                setNearestTreeState('too-far');
+                setModalContent('tooFar');
+                setDm(true);
+                setYearselected(0);
+                setRequestedPopupTreeId('');
+                setTmppins(0);
+                if (mapObj) {
+                    mapObj.flyTo(closest.coords, 12);
+                }
+                return;
+            }
+
+            try {
+                const route = await fetchWalkingRoute(currentUserPosition, closest.coords);
+
+                setNearestTree({
+                    ...closest,
+                    walkingDistanceInKm: route.distanceInKm,
+                    walkingTimeInMinutes: route.durationInMinutes,
+                });
+                setUserPosition(route.snappedStart);
+                setRouteToTree(route.coordinates);
+                setRouteMeta({
+                    distanceInKm: route.distanceInKm,
+                    durationInMinutes: route.durationInMinutes,
+                    startSnapDistanceInMeters: route.startSnapDistanceInMeters,
+                    endSnapDistanceInMeters: route.endSnapDistanceInMeters
+                });
+                setNearestTreeState('ready');
+            } catch (error) {
+                setNearestTree(closest);
+                setRouteToTree([]);
+                setRouteMeta(null);
+                setNearestTreeState('route-error');
+            }
+
+            setYearselected(closest.year);
+            setRequestedPopupTreeId(closest.year);
+            setTmppins(0);
+            if (mapObj) {
+                mapObj.flyTo(closest.coords, 17);
+            }
+        };
+
+        if (!navigator.geolocation) {
+            if (userPosition) {
+                proceedWithPosition(userPosition);
+                return;
+            }
+
+            setNearestTree(null);
+            setNearestTreeState('unsupported');
+            setRouteToTree([]);
+            setRouteMeta(null);
+            setYearselected(0);
+            setRequestedPopupTreeId('');
+            setGuidedTreeId('');
+            return;
+        }
 
         navigator.geolocation.getCurrentPosition(
             async ({ coords }) => {
                 const currentUserPosition = [coords.latitude, coords.longitude];
-                const closest = findNearestTree(currentUserPosition);
-
-                if (!closest) {
-                    setNearestTree(null);
-                    setNearestTreeState('error');
-                    setUserPosition(currentUserPosition);
-                    setRouteToTree([]);
-                    setRouteMeta(null);
-                    return;
-                }
-
-                setUserPosition(currentUserPosition);
-
-                if (closest.walkingTimeInMinutes > MAX_WALKING_TIME_MINUTES) {
-                    setNearestTree(closest);
-                    setRouteToTree([]);
-                    setRouteMeta(null);
-                    setNearestTreeState('too-far');
-                    setModalContent('tooFar');
-                    setDm(true);
-                    setYearselected(0);
-                    setRequestedPopupTreeId('');
-                    setTmppins(0);
-                    if (mapObj) {
-                        mapObj.flyTo(closest.coords, 12);
-                    }
-                    return;
-                }
-
-                try {
-                    const route = await fetchWalkingRoute(currentUserPosition, closest.coords);
-
-                    setNearestTree({
-                        ...closest,
-                        walkingDistanceInKm: route.distanceInKm,
-                        walkingTimeInMinutes: route.durationInMinutes,
-                    });
-                    setUserPosition(route.snappedStart);
-                    setRouteToTree(route.coordinates);
-                    setRouteMeta({
-                        distanceInKm: route.distanceInKm,
-                        durationInMinutes: route.durationInMinutes,
-                        startSnapDistanceInMeters: route.startSnapDistanceInMeters,
-                        endSnapDistanceInMeters: route.endSnapDistanceInMeters
-                    });
-                    setNearestTreeState('ready');
-                } catch (error) {
-                    setNearestTree(closest);
-                    setRouteToTree([]);
-                    setRouteMeta(null);
-                    setNearestTreeState('route-error');
-                }
-
-                setYearselected(closest.year);
-                setRequestedPopupTreeId(closest.year);
-                setTmppins(0);
-                if (mapObj) {
-                    mapObj.flyTo(closest.coords, 17);
-                }
+                await proceedWithPosition(currentUserPosition);
             },
             (error) => {
+                if (userPosition) {
+                    proceedWithPosition(userPosition);
+                    return;
+                }
+
                 setNearestTree(null);
-                setUserPosition(null);
                 setRouteToTree([]);
                 setRouteMeta(null);
+                setYearselected(0);
+                setRequestedPopupTreeId('');
+                setGuidedTreeId('');
 
                 if (error.code === error.PERMISSION_DENIED) {
                     setNearestTreeState('denied');
@@ -484,7 +525,7 @@ export const PinContextProvider = props => {
                 maximumAge: 300000
             }
         );
-    }, [mapObj]);
+    }, [mapObj, userPosition]);
 
     const provider = {
         dm,
@@ -500,6 +541,7 @@ export const PinContextProvider = props => {
         routeToTree, setRouteToTree,
         routeMeta, setRouteMeta,
         popupOpen, setPopupOpen,
+        guidedTreeId, setGuidedTreeId,
         requestedPopupTreeId, setRequestedPopupTreeId,
         nearestTree, setNearestTree,
         nearestTreeState, setNearestTreeState,
@@ -511,6 +553,7 @@ export const PinContextProvider = props => {
         selectedSpeciesId, setSelectedSpeciesId,
         unlockedTrees, setUnlockedTrees,
         unlockAllTrees,
+        hasUnlockedEveryTree,
         unlockTree,
         unlockEveryTree,
         resetUnlockedPassport,
