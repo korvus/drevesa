@@ -404,7 +404,7 @@ a {
 .modal--intro .introGameIllustration {
   display: inline-block;
   width: 28rem;
-  margin: 1.2rem 1.4rem 0.8rem -14rem;
+  margin: 1.2rem 1.4rem 0.8rem -6rem;
   vertical-align: top;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.22));
   transform: rotate(-4deg);
@@ -420,7 +420,7 @@ a {
 
 .modal--intro .introGameWalk {
   display: inline-block;
-  width: calc(100% - 16rem);
+  width: calc(100% - 26rem);
   margin-top: 1.4rem;
   vertical-align: top;
 }
