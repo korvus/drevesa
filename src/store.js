@@ -430,21 +430,21 @@ export const PinContextProvider = props => {
 
             setUserPosition(currentUserPosition);
 
-            if (closest.walkingTimeInMinutes > MAX_WALKING_TIME_MINUTES) {
-                setNearestTree(closest);
-                setRouteToTree([]);
-                setRouteMeta(null);
-                setNearestTreeState('too-far');
+                if (closest.walkingTimeInMinutes > MAX_WALKING_TIME_MINUTES) {
+                    setNearestTree(closest);
+                    setRouteToTree([]);
+                    setRouteMeta(null);
+                    setNearestTreeState('too-far');
                 setModalContent('tooFar');
                 setDm(true);
-                setYearselected(0);
-                setRequestedPopupTreeId('');
-                setTmppins(0);
-                if (mapObj) {
-                    mapObj.flyTo(closest.coords, 12);
+                    setYearselected(0);
+                    setRequestedPopupTreeId('');
+                    setTmppins(0);
+                    if (mapObj) {
+                        mapObj.flyTo(currentUserPosition, 14);
+                    }
+                    return;
                 }
-                return;
-            }
 
             try {
                 const route = await fetchWalkingRoute(currentUserPosition, closest.coords);
