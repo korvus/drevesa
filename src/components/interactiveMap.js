@@ -55,13 +55,14 @@ function haversineDistanceInMeters(fromCoords, toCoords) {
 }
 
 function LockedTreePopup({ treeId, coords }) {
-    const { userPosition, setUserPosition, unlockTree, guidedTreeId, mapData } = useContext(PinContext);
+    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, mapData } = useContext(PinContext);
     const [distanceInMeters, setDistanceInMeters] = useState(null);
     const [geoStatus, setGeoStatus] = useState('idle');
     const watchIdRef = useRef(null);
     const lastPositionRef = useRef(null);
     const lastUpdateTsRef = useRef(0);
     const isGuidedTree = guidedTreeId === treeId;
+    const isNearestTree = nearestTree && nearestTree.year === treeId;
 
     useEffect(() => {
         if (!userPosition) {
@@ -73,6 +74,7 @@ function LockedTreePopup({ treeId, coords }) {
     }, [coords, userPosition]);
 
     const isNearby = distanceInMeters !== null && distanceInMeters <= GAME_DISTANCE_THRESHOLD_METERS;
+    const shouldShowGoThere = !isNearby && (isGuidedTree || isNearestTree);
     const estimatedWalkingMinutes = distanceInMeters !== null
         ? Math.max(1, Math.round(((distanceInMeters / 1000) / 4.8) * 60))
         : null;
@@ -178,7 +180,7 @@ function LockedTreePopup({ treeId, coords }) {
                     <Text tid="gameLockedDuration" /> {estimatedWalkingMinutes} <Text tid="nearestTreeMinutes" />.
                 </p>
             )}
-            {isGuidedTree && !isNearby && (
+            {shouldShowGoThere && (
                 <button type="button" className="gamePopupButton gamePopupButton--secondary" onClick={handleGoThere}>
                     <Text tid="gameGoThere" />
                 </button>
@@ -187,7 +189,7 @@ function LockedTreePopup({ treeId, coords }) {
                 <button type="button" className="gamePopupButton" onClick={() => unlockTree(treeId)}>
                     <Text tid="gameUnlockCta" />
                 </button>
-            ) : !isGuidedTree ? (
+            ) : !shouldShowGoThere ? (
                 <button type="button" className="gamePopupButton gamePopupButton--secondary" onClick={handleUseLocation}>
                     {geoStatus === 'loading' ? <Text tid="nearestTreeLoading" /> : <Text tid="gameUseLocation" />}
                 </button>
