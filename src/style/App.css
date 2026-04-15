@@ -1378,22 +1378,76 @@ a {
 
   .nearestTreeFeedback--floating {
     position: fixed;
-    top: calc(env(safe-area-inset-top, 0px) + 1rem);
-    left: 1rem;
-    right: auto;
+    top: 0;
+    left: 0;
+    right: 0;
     bottom: auto;
-    width: min(29rem, calc(100vw - 9rem));
+    width: 100%;
     display: block;
     z-index: 650;
-    padding: 1rem 1.2rem;
-    border-radius: 14px;
-    background: rgba(232, 232, 229, 0.96);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    box-sizing: border-box;
+    padding: calc(env(safe-area-inset-top, 0px) + 1rem) 8.2rem 1.1rem 1.2rem;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(23, 128, 64, 0.16);
+    background: linear-gradient(180deg, rgba(240, 244, 236, 0.98) 0%, rgba(232, 232, 229, 0.94) 100%);
+    box-shadow: 0 10px 28px rgba(20, 55, 32, 0.14);
     backdrop-filter: blur(6px);
+  }
+
+  .nearestTreeFeedbackClose {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 0.6rem);
+    right: 6rem;
+    width: 2.8rem;
+    height: 2.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: rgba(43, 78, 53, 0.72);
+    font-size: 2.2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .nearestTreeFeedbackClose:hover {
+    color: #1c4b2a;
   }
 
   .nearestTreeFeedback--floating .nearestTreeStatus {
     margin: 0;
+    font-size: 1.45rem;
+    line-height: 1.42;
+    color: #234730;
+  }
+
+  .nearestTreeFeedback--floating .nearestTreeResult p {
+    margin: 0;
+    font-size: 1.45rem;
+    line-height: 1.42;
+  }
+
+  .nearestTreeFeedback--floating .nearestTreeResult p + p {
+    margin-top: 0.45rem;
+  }
+
+  .nearestTreeFeedback--floating .nearestTreeResult p:first-child {
+    color: #2d5d3b;
+  }
+
+  .nearestTreeFeedback--floating .nearestTreeResult strong {
+    display: inline;
+    margin: 0;
+  }
+
+  .nearestTreeFeedback--floating .nearestTreeMeta {
+    display: block;
+    margin: 0.2rem 0 0.15rem;
+    font-size: 0.9em;
+    line-height: 1.35;
+    opacity: 0.8;
   }
 
   .about {

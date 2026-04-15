@@ -23,6 +23,23 @@ import carteExplication from '../img/carteExplication.png';
 const Ljubljana = [46.0507666, 14.5047565];
 const listDate = Object.keys(coords);
 const GAME_DISTANCE_THRESHOLD_METERS = 20;
+const MOBILE_BREAKPOINT_PX = 767;
+const MOBILE_POPUP_OFFSET = [0, 28];
+const MOBILE_POPUP_TOP_LEFT_PADDING = [12, 188];
+const MOBILE_POPUP_BOTTOM_RIGHT_PADDING = [12, 28];
+
+function formatDistance(distanceInKm, language) {
+    if (distanceInKm < 1) {
+        return `${Math.round(distanceInKm * 1000)} m`;
+    }
+
+    const formatter = new Intl.NumberFormat(language === 'sl' ? 'sl-SI' : language === 'fr' ? 'fr-FR' : 'en-GB', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+    });
+
+    return `${formatter.format(distanceInKm)} km`;
+}
 
 function WalkingIcon() {
     return (
@@ -55,7 +72,7 @@ function haversineDistanceInMeters(fromCoords, toCoords) {
 }
 
 function LockedTreePopup({ treeId, coords }) {
-    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, mapData } = useContext(PinContext);
+    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, nextTreeSuggestion, routeMeta, userLanguage, mapData } = useContext(PinContext);
     const [distanceInMeters, setDistanceInMeters] = useState(null);
     const [geoStatus, setGeoStatus] = useState('idle');
     const watchIdRef = useRef(null);
@@ -75,9 +92,29 @@ function LockedTreePopup({ treeId, coords }) {
 
     const isNearby = distanceInMeters !== null && distanceInMeters <= GAME_DISTANCE_THRESHOLD_METERS;
     const shouldShowGoThere = !isNearby && (isGuidedTree || isNearestTree);
-    const estimatedWalkingMinutes = distanceInMeters !== null
+    const fallbackWalkingMinutes = distanceInMeters !== null
         ? Math.max(1, Math.round(((distanceInMeters / 1000) / 4.8) * 60))
         : null;
+    const routedDistanceInKm = isNearestTree && nearestTree?.walkingDistanceInKm != null
+        ? nearestTree.walkingDistanceInKm
+        : isGuidedTree && routeMeta?.distanceInKm != null
+            ? routeMeta.distanceInKm
+            : isGuidedTree && nextTreeSuggestion?.year === treeId && nextTreeSuggestion?.walkingDistanceInKm != null
+                ? nextTreeSuggestion.walkingDistanceInKm
+                : null;
+    const routedWalkingMinutes = isNearestTree && nearestTree?.walkingTimeInMinutes != null
+        ? nearestTree.walkingTimeInMinutes
+        : isGuidedTree && routeMeta?.durationInMinutes != null
+            ? routeMeta.durationInMinutes
+            : isGuidedTree && nextTreeSuggestion?.year === treeId && nextTreeSuggestion?.walkingTimeInMinutes != null
+                ? nextTreeSuggestion.walkingTimeInMinutes
+                : null;
+    const distanceLabel = routedDistanceInKm !== null
+        ? formatDistance(routedDistanceInKm, userLanguage)
+        : distanceInMeters !== null
+            ? `${distanceInMeters} m`
+            : null;
+    const estimatedWalkingMinutes = routedWalkingMinutes ?? fallbackWalkingMinutes;
 
     useEffect(() => {
         if (!navigator.geolocation) {
@@ -170,14 +207,14 @@ function LockedTreePopup({ treeId, coords }) {
         <div className="gamePopup">
             <span className="title">{treeId}</span>
             <p><Text tid="gameLockedIntro" /></p>
-            {distanceInMeters !== null && (
+            {distanceLabel !== null && (
                 <p className="popupMetric">
-                    <Text tid="gameLockedDistance" /> {distanceInMeters} m.
+                    <Text tid="gameLockedDistance" /> <strong>{distanceLabel}.</strong>
                 </p>
             )}
             {estimatedWalkingMinutes !== null && (
                 <p className="popupMetric">
-                    <Text tid="gameLockedDuration" /> {estimatedWalkingMinutes} <Text tid="nearestTreeMinutes" />.
+                    <Text tid="gameLockedDuration" /> <strong>{estimatedWalkingMinutes} <Text tid="nearestTreeMinutes" />.</strong>
                 </p>
             )}
             {shouldShowGoThere && (
@@ -279,7 +316,7 @@ function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
     );
 }
 
-function constructJsx(trees, map, markerRef, userLanguage, isTreeUnlocked, setYearselected) {
+function constructJsx(trees, map, markerRef, userLanguage, isTreeUnlocked, setYearselected, isMobileViewport) {
     const jsxElements = [];
     let i = 0;
     let shouldBeOneAtLeast = 0;
@@ -305,7 +342,13 @@ function constructJsx(trees, map, markerRef, userLanguage, isTreeUnlocked, setYe
                         }
                     }}
                 >
-                    <Popup maxWidth={264} minWidth={0}>
+                    <Popup
+                        maxWidth={264}
+                        minWidth={0}
+                        offset={isMobileViewport ? MOBILE_POPUP_OFFSET : undefined}
+                        autoPanPaddingTopLeft={isMobileViewport ? MOBILE_POPUP_TOP_LEFT_PADDING : undefined}
+                        autoPanPaddingBottomRight={isMobileViewport ? MOBILE_POPUP_BOTTOM_RIGHT_PADDING : undefined}
+                    >
                         {unlocked ? (
                             <UnlockedTreePopup treeId={title} treeData={trees[tree]} userLanguage={userLanguage} />
                         ) : (
@@ -372,6 +415,7 @@ function ListMarkers(props) {
     const setWarn = props.warning;
     const userLanguage = props.userLanguage;
     const { isTreeUnlocked, setYearselected } = useContext(PinContext);
+    const isMobileViewport = typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT_PX;
 
     let trees = {};
     if (props.hover !== 0) {
@@ -384,7 +428,7 @@ function ListMarkers(props) {
         }
     }
 
-    let arrTrees = constructJsx(trees, map, ref, userLanguage, isTreeUnlocked, setYearselected);
+    let arrTrees = constructJsx(trees, map, ref, userLanguage, isTreeUnlocked, setYearselected, isMobileViewport);
 
     useEffect(() => {
         if (arrTrees[1] === 0) {
@@ -395,7 +439,7 @@ function ListMarkers(props) {
     });
 
     useMapEvent('drag', () => {
-        let dragTrees = constructJsx(trees, map, ref, userLanguage, isTreeUnlocked, setYearselected);
+        let dragTrees = constructJsx(trees, map, ref, userLanguage, isTreeUnlocked, setYearselected, isMobileViewport);
         if (dragTrees[1] === 0) {
             props.warning(true);
         } else {
@@ -404,7 +448,7 @@ function ListMarkers(props) {
     })
 
     useMapEvent('zoomend', () => {
-        let zoomTrees = constructJsx(trees, map, ref, userLanguage, isTreeUnlocked, setYearselected);
+        let zoomTrees = constructJsx(trees, map, ref, userLanguage, isTreeUnlocked, setYearselected, isMobileViewport);
         if (zoomTrees[1] === 0) {
             props.warning(true);
         } else {

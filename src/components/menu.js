@@ -52,12 +52,12 @@ function renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, use
             <Text tid="nearestTreeSummaryPrefix" />{' '}
             <span className="nearestTreeMeta">({yearLabel}, {nearestTreeLabel})</span>{' '}
             <Text tid="nearestTreeSummaryDistancePrefix" />{' '}
-            {distanceLabel}
+            <strong>{distanceLabel}</strong>
             {includeWalkingTime && (
                 <>
                     {', '}
                     <Text tid="nearestTreeSummaryTimePrefix" />{' '}
-                    {nearestTree.walkingTimeInMinutes} <Text tid="nearestTreeMinutes" />
+                    <strong>{nearestTree.walkingTimeInMinutes} <Text tid="nearestTreeMinutes" /></strong>
                 </>
             )}
             .
@@ -179,6 +179,7 @@ const ListByYears = (props) => {
 
 const Col = () => {
     const [circles, setCircles] = useState([]);
+    const [isNearestTreeFloatingDismissed, setIsNearestTreeFloatingDismissed] = useState(false);
     const { setDm, dm, setYearselected, setShowClouds, showClouds, setModalContent, setTmppins, yearselected, mapData, dictionary, userLanguage, popupOpen, nearestTree, nearestTreeState, locateNearestTree, focusAllTrees, isTreeUnlocked, guidedTreeId } = useContext(PinContext);
 
     const escFunction = useCallback((event) => {
@@ -212,6 +213,16 @@ const Col = () => {
     const nearestTreeSummary = renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, userLanguage);
     const nearestTreeFeedback = renderNearestTreeFeedbackContent(nearestTreeState, nearestTree, nearestTreeSummary);
     const hasUnlockedEveryTree = listDate.every((year) => isTreeUnlocked(year));
+
+    useEffect(() => {
+        setIsNearestTreeFloatingDismissed(false);
+    }, [
+        nearestTreeState,
+        nearestTree?.year,
+        nearestTree?.walkingDistanceInKm,
+        nearestTree?.walkingTimeInMinutes
+    ]);
+
     const handleBadgeClick = () => {
         setYearselected(0);
         setTmppins(0);
@@ -292,15 +303,27 @@ const Col = () => {
                 <button
                     type="button"
                     className="nearestTreeButton nearestTreeButton--floating"
-                    onClick={locateNearestTree}
+                    onClick={() => {
+                        setIsNearestTreeFloatingDismissed(false);
+                        locateNearestTree();
+                    }}
                     aria-label={dictionary.nearestTreeAction || 'Find the nearest tree'}
                     title={dictionary.nearestTreeAction || 'Find the nearest tree'}
                 >
                     <WalkingIcon />
                 </button>
             )}
-            {!dm && !hasUnlockedEveryTree && !guidedTreeId && nearestTreeFeedback && (
+            {!dm && !hasUnlockedEveryTree && !guidedTreeId && nearestTreeFeedback && !isNearestTreeFloatingDismissed && (
                 <div className="nearestTreeFeedback nearestTreeFeedback--floating">
+                    <button
+                        type="button"
+                        className="nearestTreeFeedbackClose"
+                        onClick={() => setIsNearestTreeFloatingDismissed(true)}
+                        aria-label={dictionary.close || 'Fermer'}
+                        title={dictionary.close || 'Fermer'}
+                    >
+                        ×
+                    </button>
                     {nearestTreeFeedback}
                 </div>
             )}
