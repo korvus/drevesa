@@ -16,6 +16,7 @@ const FOOT_ROUTER_BASE_URL = 'https://routing.openstreetmap.de/routed-foot';
 const MAX_WALKING_TIME_MINUTES = 120;
 const LJUBLJANA_COORDS = [46.0507666, 14.5047565];
 const NEAREST_TREE_ZOOM = 17;
+const FOLLOW_USER_ZOOM = 17;
 const MOBILE_NEAREST_TREE_OFFSET_RATIO = 0.22;
 const MOBILE_NEAREST_TREE_MAX_OFFSET_PX = 140;
 
@@ -233,9 +234,13 @@ export const PinContextProvider = props => {
     const [recentlyUnlockedTreeId, setRecentlyUnlockedTreeId] = useState('');
     const [selectedSpeciesId, setSelectedSpeciesId] = useState('');
     const [guidedTreeId, setGuidedTreeId] = useState('');
+    const [isFollowingUser, setIsFollowingUser] = useState(false);
+    const followWatchIdRef = useRef(null);
+    const lastFollowCenterTsRef = useRef(0);
 
     const [mapObj, setMapObj] = useState(null);
     const goToArea = (regionCoord, zoom = 13) => {
+        setIsFollowingUser(false);
         if (mapObj) {
             mapObj.flyTo(regionCoord, zoom);
         }
@@ -246,11 +251,82 @@ export const PinContextProvider = props => {
         setMapObj: setMapObj,
         goToArea: goToArea
     }
+
+    const updateFollowedUserPosition = useCallback((coords) => {
+        const nextPosition = [coords.latitude, coords.longitude];
+        setUserPosition(nextPosition);
+
+        if (!mapObj) {
+            return;
+        }
+
+        const now = Date.now();
+        if (now - lastFollowCenterTsRef.current < 1000) {
+            return;
+        }
+
+        lastFollowCenterTsRef.current = now;
+        const nextZoom = Math.max(mapObj.getZoom(), FOLLOW_USER_ZOOM);
+        mapObj.setView(nextPosition, nextZoom, { animate: true });
+    }, [mapObj]);
+
+    useEffect(() => {
+        if (!isFollowingUser) {
+            if (followWatchIdRef.current !== null && typeof navigator !== 'undefined' && navigator.geolocation) {
+                navigator.geolocation.clearWatch(followWatchIdRef.current);
+                followWatchIdRef.current = null;
+            }
+            return undefined;
+        }
+
+        if (typeof navigator === 'undefined' || !navigator.geolocation) {
+            setIsFollowingUser(false);
+            return undefined;
+        }
+
+        followWatchIdRef.current = navigator.geolocation.watchPosition(
+            ({ coords: currentCoords }) => {
+                updateFollowedUserPosition(currentCoords);
+            },
+            () => {
+                setIsFollowingUser(false);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 2000
+            }
+        );
+
+        return () => {
+            if (followWatchIdRef.current !== null) {
+                navigator.geolocation.clearWatch(followWatchIdRef.current);
+                followWatchIdRef.current = null;
+            }
+        };
+    }, [isFollowingUser, updateFollowedUserPosition]);
+
+    const startFollowingUser = useCallback(() => {
+        if (typeof navigator === 'undefined' || !navigator.geolocation) {
+            setNearestTreeState('unsupported');
+            return;
+        }
+
+        setIsFollowingUser(true);
+        if (mapObj) {
+            mapObj.closePopup();
+            if (userPosition) {
+                mapObj.flyTo(userPosition, FOLLOW_USER_ZOOM);
+            }
+        }
+    }, [mapObj, userPosition]);
+
     const focusAllTrees = useCallback(() => {
         if (!mapObj || ALL_TREE_COORDS.length === 0) {
             return;
         }
 
+        setIsFollowingUser(false);
         mapObj.closePopup();
         mapObj.flyToBounds(ALL_TREE_COORDS, {
             padding: [48, 48],
@@ -374,6 +450,7 @@ export const PinContextProvider = props => {
     }, []);
 
     const traceNextLockedTreeFrom = useCallback(async (fromTreeId) => {
+        setIsFollowingUser(false);
         const fromTree = trees[fromTreeId] && trees[fromTreeId][0];
         const currentPosition = userPosition || (fromTree ? fromTree.coords : null);
 
@@ -433,6 +510,7 @@ export const PinContextProvider = props => {
     }, [mapObj, unlockAllTrees, unlockedTrees, userPosition]);
 
     const locateNearestTree = useCallback(() => {
+        setIsFollowingUser(false);
         setNextTreeSuggestion(null);
         setNearestTreeState('loading');
         setYearselected(0);
@@ -566,6 +644,8 @@ export const PinContextProvider = props => {
         setWarning,
         userLanguage: activeLanguage,
         userPosition, setUserPosition,
+        isFollowingUser, setIsFollowingUser,
+        startFollowingUser,
         routeToTree, setRouteToTree,
         routeMeta, setRouteMeta,
         popupOpen, setPopupOpen,

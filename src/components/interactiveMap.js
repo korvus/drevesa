@@ -72,7 +72,7 @@ function haversineDistanceInMeters(fromCoords, toCoords) {
 }
 
 function LockedTreePopup({ treeId, coords }) {
-    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, nextTreeSuggestion, routeMeta, userLanguage, mapData } = useContext(PinContext);
+    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, nextTreeSuggestion, routeMeta, userLanguage, mapData, startFollowingUser } = useContext(PinContext);
     const [distanceInMeters, setDistanceInMeters] = useState(null);
     const [geoStatus, setGeoStatus] = useState('idle');
     const watchIdRef = useRef(null);
@@ -194,8 +194,7 @@ function LockedTreePopup({ treeId, coords }) {
         }
 
         if (userPosition) {
-            mapData.mapObj.closePopup();
-            mapData.mapObj.flyTo(userPosition, 17);
+            startFollowingUser();
             return;
         }
 
@@ -327,6 +326,11 @@ function constructJsx(trees, map, markerRef, userLanguage, isTreeUnlocked, setYe
         if (trees.hasOwnProperty(tree)) {
             const unlocked = isTreeUnlocked(title);
             const icone = getIcon(unlocked ? trees[tree].icon : 'questionMarkTree');
+            const popupOptions = isMobileViewport ? {
+                offset: MOBILE_POPUP_OFFSET,
+                autoPanPaddingTopLeft: MOBILE_POPUP_TOP_LEFT_PADDING,
+                autoPanPaddingBottomRight: MOBILE_POPUP_BOTTOM_RIGHT_PADDING
+            } : {};
 
             if (map.getBounds().contains(trees[tree].coords)) { shouldBeOneAtLeast++ };
 
@@ -345,9 +349,7 @@ function constructJsx(trees, map, markerRef, userLanguage, isTreeUnlocked, setYe
                     <Popup
                         maxWidth={264}
                         minWidth={0}
-                        offset={isMobileViewport ? MOBILE_POPUP_OFFSET : undefined}
-                        autoPanPaddingTopLeft={isMobileViewport ? MOBILE_POPUP_TOP_LEFT_PADDING : undefined}
-                        autoPanPaddingBottomRight={isMobileViewport ? MOBILE_POPUP_BOTTOM_RIGHT_PADDING : undefined}
+                        {...popupOptions}
                     >
                         {unlocked ? (
                             <UnlockedTreePopup treeId={title} treeData={trees[tree]} userLanguage={userLanguage} />
