@@ -244,6 +244,7 @@ a {
 .modal.modal--unlock .contentModal {
   margin-top: 0;
   position: relative;
+  z-index: 1;
   padding-right: 0rem;
   padding-bottom: 0;
 }
@@ -251,6 +252,7 @@ a {
 .modal.modal--victory .contentModal {
   margin-top: 0;
   position: relative;
+  z-index: 1;
   padding-right: 0;
   padding-bottom: 0;
 }
@@ -343,6 +345,7 @@ a {
   box-shadow: 0 0 50px #b7d971;
   position: absolute;
   z-index: 1;
+  pointer-events: none;
 }
 
 .unlockReward img {
@@ -736,14 +739,39 @@ a {
   opacity: 1;
 }
 
+.modal--unlock .innerModal,
+.modal--victory .innerModal {
+  position: relative;
+}
+
 .modal--unlock .wrapperClose {
-    margin-left: calc(100% - 41px);
-    margin-top: 10px;
+  position: absolute;
+  top: -30rem;
+  right: 1.2rem;
+  margin: 0;
+  z-index: 10002;
+  padding: 0.5rem;
+  box-sizing: content-box;
+  background: #b7d971;
+  border-radius: 50%;
+  box-shadow: 0 8px 20px rgba(20, 57, 31, 0.18);
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .modal--victory .wrapperClose {
-    margin-left: calc(100% - 41px);
-    margin-top: 10px;
+  position: absolute;
+  top: -30rem;
+  right: 1.2rem;
+  margin: 0;
+  z-index: 10002;
+  padding: 0.5rem;
+  box-sizing: content-box;
+  background: #b7d971;
+  border-radius: 50%;
+  box-shadow: 0 8px 20px rgba(20, 57, 31, 0.18);
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .wrapperClose {
@@ -753,7 +781,12 @@ a {
   height: 32px;
   width: 32px;
   cursor: pointer;
-  margin-left: calc(100% - 32px);
+  margin-left: calc(100% - 42px);
+  padding: 0.5rem;
+  box-sizing: content-box;
+  border-radius: 50%;
+  background: #b7d971;
+  box-shadow: 0 8px 20px rgba(20, 57, 31, 0.18);
 }
 
 .wrapperClose .close {
@@ -764,10 +797,10 @@ a {
 .modal .close:before,
 .modal .close:after {
   position: absolute;
-  right: 1.5rem;
+  right: 1.4rem;
   content: ' ';
-  height: 3rem;
-  width: 0.3rem;
+  height: 3.4rem;
+  width: 0.4rem;
   background-color: #333;
 }
 
@@ -879,6 +912,16 @@ a {
 
 .nearestTreeFeedback--floating {
   display: none;
+}
+
+.mapLoadingOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 640;
+  background: rgba(232, 232, 229, 0.48);
+  backdrop-filter: grayscale(0.35);
+  cursor: progress;
+  pointer-events: auto;
 }
 
 .treasurePanelLink {
@@ -1008,6 +1051,7 @@ a {
   z-index: 1;
   left: 285px;
   width: 40px;
+  pointer-events: none;
 }
 
 .containerCircles {
@@ -1368,8 +1412,13 @@ a {
     height: 5.6rem;
     padding: 0;
     border-radius: 50%;
-    z-index: 650;
+    z-index: 660;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  }
+
+  .nearestTreeButton--belowFeedback {
+    top: calc(env(safe-area-inset-top, 0px) + 1.4rem);
+    z-index: 640;
   }
 
   .nearestTreeButton--desktopOverlay {
@@ -1397,7 +1446,7 @@ a {
   .nearestTreeFeedbackClose {
     position: absolute;
     top: calc(env(safe-area-inset-top, 0px) + 0.6rem);
-    right: 6rem;
+    right: 1rem;
     width: 2.8rem;
     height: 2.8rem;
     display: inline-flex;
@@ -1490,11 +1539,20 @@ a {
   }
 
   .modal--intro,
-  .modal--about {
+  .modal--about,
+  .modal.modal--species,
+  .modal.modal--treasure,
+  .modal--compact {
     left: 1rem;
     top: 1rem;
-    width: calc(100% - 4rem);
-    height: calc(100% - 4rem);
+    width: calc(100% - 2rem);
+    max-height: calc(100% - 2rem);
+    box-sizing: border-box;
+  }
+
+  .modal--intro,
+  .modal--about {
+    height: calc(100% - 2rem);
   }
 
   .modal--intro .contentModal,

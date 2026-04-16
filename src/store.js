@@ -15,6 +15,9 @@ const LANGUAGE_ALIASES = {
 const FOOT_ROUTER_BASE_URL = 'https://routing.openstreetmap.de/routed-foot';
 const MAX_WALKING_TIME_MINUTES = 120;
 const LJUBLJANA_COORDS = [46.0507666, 14.5047565];
+const NEAREST_TREE_ZOOM = 17;
+const MOBILE_NEAREST_TREE_OFFSET_RATIO = 0.22;
+const MOBILE_NEAREST_TREE_MAX_OFFSET_PX = 140;
 
 function haversineDistanceInKm(fromCoords, toCoords) {
     const toRadians = (degrees) => (degrees * Math.PI) / 180;
@@ -40,6 +43,31 @@ function estimateWalkingDistanceInKm(directDistanceInKm) {
 function estimateWalkingTimeInMinutes(distanceInKm) {
     const averageWalkingSpeedKmPerHour = 4.8;
     return Math.max(1, Math.round((distanceInKm / averageWalkingSpeedKmPerHour) * 60));
+}
+
+function getNearestTreeVerticalOffset(map) {
+    if (typeof window === 'undefined' || !window.matchMedia('(orientation: portrait)').matches) {
+        return 0;
+    }
+
+    const mapHeight = map.getSize().y;
+    return Math.min(
+        MOBILE_NEAREST_TREE_MAX_OFFSET_PX,
+        Math.max(0, Math.round(mapHeight * MOBILE_NEAREST_TREE_OFFSET_RATIO))
+    );
+}
+
+function flyToNearestTree(map, coords) {
+    const verticalOffset = getNearestTreeVerticalOffset(map);
+
+    if (verticalOffset === 0) {
+        map.flyTo(coords, NEAREST_TREE_ZOOM);
+        return;
+    }
+
+    const targetPoint = map.project(coords, NEAREST_TREE_ZOOM);
+    const centerPoint = targetPoint.subtract([0, verticalOffset]);
+    map.flyTo(map.unproject(centerPoint, NEAREST_TREE_ZOOM), NEAREST_TREE_ZOOM);
 }
 
 function findNearestTree(userCoords) {
@@ -474,7 +502,7 @@ export const PinContextProvider = props => {
             setRequestedPopupTreeId(closest.year);
             setTmppins(0);
             if (mapObj) {
-                mapObj.flyTo(closest.coords, 17);
+                flyToNearestTree(mapObj, closest.coords);
             }
         };
 

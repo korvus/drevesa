@@ -487,7 +487,7 @@ function PopupStateWatcher({ setPopupOpen }) {
 }
 
 const InteractiveMap = () => {
-    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, setShowClouds, userPosition, routeToTree, dictionary, setPopupOpen, modalContent, requestedPopupTreeId, setRequestedPopupTreeId, popupOpen, locateNearestTree, hasUnlockedEveryTree } = useContext(PinContext);
+    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, setShowClouds, userPosition, routeToTree, dictionary, setPopupOpen, modalContent, requestedPopupTreeId, setRequestedPopupTreeId, popupOpen, locateNearestTree, hasUnlockedEveryTree, nearestTreeState } = useContext(PinContext);
 
     const [divHeight, setDivHeight] = useState(0);
     const markerRef = useRef([]);
@@ -570,6 +570,9 @@ const InteractiveMap = () => {
                     >
                         <WalkingIcon />
                     </button>
+                )}
+                {nearestTreeState === 'loading' && (
+                    <div className="mapLoadingOverlay" aria-hidden="true" />
                 )}
 
                 {dm === true &&

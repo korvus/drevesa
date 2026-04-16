@@ -180,7 +180,7 @@ const ListByYears = (props) => {
 const Col = () => {
     const [circles, setCircles] = useState([]);
     const [isNearestTreeFloatingDismissed, setIsNearestTreeFloatingDismissed] = useState(false);
-    const { setDm, dm, setYearselected, setShowClouds, showClouds, setModalContent, setTmppins, yearselected, mapData, dictionary, userLanguage, popupOpen, nearestTree, nearestTreeState, locateNearestTree, focusAllTrees, isTreeUnlocked, guidedTreeId } = useContext(PinContext);
+    const { setDm, dm, setYearselected, setShowClouds, showClouds, setModalContent, setTmppins, yearselected, mapData, dictionary, userLanguage, nearestTree, nearestTreeState, locateNearestTree, focusAllTrees, isTreeUnlocked, guidedTreeId } = useContext(PinContext);
 
     const escFunction = useCallback((event) => {
         if (event.keyCode === 27) {
@@ -213,6 +213,7 @@ const Col = () => {
     const nearestTreeSummary = renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, userLanguage);
     const nearestTreeFeedback = renderNearestTreeFeedbackContent(nearestTreeState, nearestTree, nearestTreeSummary);
     const hasUnlockedEveryTree = listDate.every((year) => isTreeUnlocked(year));
+    const isNearestTreeFeedbackVisible = !hasUnlockedEveryTree && !guidedTreeId && nearestTreeFeedback && !isNearestTreeFloatingDismissed;
 
     useEffect(() => {
         setIsNearestTreeFloatingDismissed(false);
@@ -299,10 +300,10 @@ const Col = () => {
                 </div>
 
             </div>
-            {!dm && !popupOpen && (
+            {!dm && (
                 <button
                     type="button"
-                    className="nearestTreeButton nearestTreeButton--floating"
+                    className={`nearestTreeButton nearestTreeButton--floating${isNearestTreeFeedbackVisible ? ' nearestTreeButton--belowFeedback' : ''}`}
                     onClick={() => {
                         setIsNearestTreeFloatingDismissed(false);
                         locateNearestTree();
@@ -313,7 +314,7 @@ const Col = () => {
                     <WalkingIcon />
                 </button>
             )}
-            {!dm && !hasUnlockedEveryTree && !guidedTreeId && nearestTreeFeedback && !isNearestTreeFloatingDismissed && (
+            {!dm && isNearestTreeFeedbackVisible && (
                 <div className="nearestTreeFeedback nearestTreeFeedback--floating">
                     <button
                         type="button"
