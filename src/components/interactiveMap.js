@@ -71,7 +71,7 @@ function haversineDistanceInMeters(fromCoords, toCoords) {
 }
 
 function LockedTreePopup({ treeId, coords }) {
-    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, nextTreeSuggestion, routeMeta, userLanguage, mapData, startFollowingUser } = useContext(PinContext);
+    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, nextTreeSuggestion, routeToTree, routeMeta, userLanguage, mapData, startFollowingUser, isFollowingUser } = useContext(PinContext);
     const [distanceInMeters, setDistanceInMeters] = useState(null);
     const [geoStatus, setGeoStatus] = useState('idle');
     const watchIdRef = useRef(null);
@@ -90,7 +90,9 @@ function LockedTreePopup({ treeId, coords }) {
     }, [coords, userPosition]);
 
     const isNearby = distanceInMeters !== null && distanceInMeters <= GAME_DISTANCE_THRESHOLD_METERS;
-    const shouldShowGoThere = !isNearby;
+    const hasRouteToThisTree = routeToTree.length > 1 && (isGuidedTree || isNearestTree);
+    const isFollowingThisTree = isFollowingUser && isGuidedTree;
+    const shouldShowGoThere = !isNearby && !isFollowingThisTree;
     const fallbackWalkingMinutes = distanceInMeters !== null
         ? Math.max(1, Math.round(((distanceInMeters / 1000) / 4.8) * 60))
         : null;
@@ -195,7 +197,7 @@ function LockedTreePopup({ treeId, coords }) {
             )}
             {shouldShowGoThere && (
                 <button type="button" className="gamePopupButton gamePopupButton--secondary" onClick={handleGoThere}>
-                    <Text tid="gameGoThere" />
+                    <Text tid={hasRouteToThisTree ? "gameStartFollowing" : "gameGoThere"} />
                 </button>
             )}
             {isNearby ? (

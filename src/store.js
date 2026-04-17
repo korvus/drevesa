@@ -427,7 +427,17 @@ export const PinContextProvider = props => {
             });
 
             setNextTreeSuggestion((currentSuggestion) => {
-                if (!currentSuggestion || currentSuggestion.year !== target.year) {
+                if (!currentSuggestion) {
+                    return {
+                        year: target.year,
+                        coords: target.coords,
+                        directDistanceInKm: haversineDistanceInKm(nextPosition, target.coords),
+                        walkingDistanceInKm: route.distanceInKm,
+                        walkingTimeInMinutes: route.durationInMinutes
+                    };
+                }
+
+                if (currentSuggestion.year !== target.year) {
                     return currentSuggestion;
                 }
 
@@ -533,13 +543,36 @@ export const PinContextProvider = props => {
             ? { year: nextTreeSuggestionRef.current.year, coords: nextTreeSuggestionRef.current.coords }
             : null;
         const followTarget = target || nearestTarget || nextSuggestionTarget;
+        const hasExistingRouteToTarget = Boolean(
+            followTarget &&
+            routeToTreeRef.current.length > 1 &&
+            (
+                nearestTreeRef.current?.year === followTarget.year ||
+                nextTreeSuggestionRef.current?.year === followTarget.year
+            )
+        );
         followRouteTargetRef.current = followTarget;
-        routeToTreeRef.current = [];
+        routeToTreeRef.current = hasExistingRouteToTarget ? routeToTreeRef.current : [];
         lastRouteRefreshPositionRef.current = null;
-        lastRouteRefreshTsRef.current = 0;
+        lastRouteRefreshTsRef.current = hasExistingRouteToTarget ? Date.now() : 0;
         isRouteRefreshPendingRef.current = false;
-        setRouteToTree([]);
-        setRouteMeta(null);
+        if (!hasExistingRouteToTarget) {
+            setRouteToTree([]);
+            setRouteMeta(null);
+        }
+        if (
+            followTarget &&
+            nearestTreeRef.current?.year !== followTarget.year &&
+            nextTreeSuggestionRef.current?.year !== followTarget.year
+        ) {
+            const nextFollowSuggestion = {
+                year: followTarget.year,
+                coords: followTarget.coords,
+                directDistanceInKm: userPosition ? haversineDistanceInKm(userPosition, followTarget.coords) : null
+            };
+            nextTreeSuggestionRef.current = nextFollowSuggestion;
+            setNextTreeSuggestion(nextFollowSuggestion);
+        }
         setGuidedTreeId(followTarget ? followTarget.year : '');
         setFollowMapCentered(true);
         setIsFollowingUser(true);

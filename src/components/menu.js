@@ -180,7 +180,7 @@ const ListByYears = (props) => {
 const Col = () => {
     const [circles, setCircles] = useState([]);
     const [isNearestTreeFloatingDismissed, setIsNearestTreeFloatingDismissed] = useState(false);
-    const { setDm, dm, setYearselected, setShowClouds, showClouds, setModalContent, setTmppins, yearselected, mapData, dictionary, userLanguage, nearestTree, nearestTreeState, locateNearestTree, focusAllTrees, isTreeUnlocked, guidedTreeId } = useContext(PinContext);
+    const { setDm, dm, setYearselected, setShowClouds, showClouds, setModalContent, setTmppins, yearselected, mapData, dictionary, userLanguage, nearestTree, nearestTreeState, locateNearestTree, focusAllTrees, isTreeUnlocked, guidedTreeId, nextTreeSuggestion, routeMeta } = useContext(PinContext);
 
     const escFunction = useCallback((event) => {
         if (event.keyCode === 27) {
@@ -209,11 +209,27 @@ const Col = () => {
         setCircles(newCircles);
     }
 
-    const nearestTreeLabel = nearestTree ? (dictionary[`adrs${nearestTree.year}`] || nearestTree.year) : '';
-    const nearestTreeSummary = renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, userLanguage);
-    const nearestTreeFeedback = renderNearestTreeFeedbackContent(nearestTreeState, nearestTree, nearestTreeSummary);
+    const guidedTreeBase = guidedTreeId
+        ? [nearestTree, nextTreeSuggestion].find((tree) => tree?.year === guidedTreeId)
+        : null;
+    const guidedTree = guidedTreeBase && routeMeta?.distanceInKm != null && routeMeta?.durationInMinutes != null
+        ? {
+            ...guidedTreeBase,
+            walkingDistanceInKm: routeMeta.distanceInKm,
+            walkingTimeInMinutes: routeMeta.durationInMinutes
+        }
+        : guidedTreeBase;
+    const activeFeedbackTree = guidedTreeId
+        ? guidedTree?.walkingDistanceInKm != null ? guidedTree : null
+        : nearestTree;
+    const activeFeedbackState = guidedTreeId && activeFeedbackTree?.walkingDistanceInKm != null
+        ? 'ready'
+        : nearestTreeState;
+    const nearestTreeLabel = activeFeedbackTree ? (dictionary[`adrs${activeFeedbackTree.year}`] || activeFeedbackTree.year) : '';
+    const nearestTreeSummary = renderNearestTreeSummary(activeFeedbackTree, nearestTreeLabel, dictionary, userLanguage);
+    const nearestTreeFeedback = renderNearestTreeFeedbackContent(activeFeedbackState, activeFeedbackTree, nearestTreeSummary);
     const hasUnlockedEveryTree = listDate.every((year) => isTreeUnlocked(year));
-    const isNearestTreeFeedbackVisible = !hasUnlockedEveryTree && !guidedTreeId && nearestTreeFeedback && !isNearestTreeFloatingDismissed;
+    const isNearestTreeFeedbackVisible = !hasUnlockedEveryTree && nearestTreeFeedback && !isNearestTreeFloatingDismissed;
 
     useEffect(() => {
         setIsNearestTreeFloatingDismissed(false);
@@ -221,7 +237,12 @@ const Col = () => {
         nearestTreeState,
         nearestTree?.year,
         nearestTree?.walkingDistanceInKm,
-        nearestTree?.walkingTimeInMinutes
+        nearestTree?.walkingTimeInMinutes,
+        guidedTreeId,
+        nextTreeSuggestion?.walkingDistanceInKm,
+        nextTreeSuggestion?.walkingTimeInMinutes,
+        routeMeta?.distanceInKm,
+        routeMeta?.durationInMinutes
     ]);
 
     const handleBadgeClick = () => {
@@ -286,7 +307,7 @@ const Col = () => {
                                     {nearestTreeState === 'loading' ? <Text tid="nearestTreeLoading" /> : <Text tid="nearestTreeAction" />}
                                 </button>
                                 <div className="nearestTreeFeedback nearestTreeFeedback--panel">
-                                    {!guidedTreeId && nearestTreeFeedback}
+                                    {nearestTreeFeedback}
                                 </div>
                             </>
                         )}
