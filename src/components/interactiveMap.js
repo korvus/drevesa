@@ -9,7 +9,6 @@ import {
     Polyline
 } from "react-leaflet";
 import Cloud from './cloud.js';
-import "leaflet/dist/leaflet.css";
 import Modalcontent from './modal.js';
 import coords from '../datas/datas.json';
 import { PinContext, Text } from '../store';
@@ -91,7 +90,7 @@ function LockedTreePopup({ treeId, coords }) {
     }, [coords, userPosition]);
 
     const isNearby = distanceInMeters !== null && distanceInMeters <= GAME_DISTANCE_THRESHOLD_METERS;
-    const shouldShowGoThere = !isNearby && (isGuidedTree || isNearestTree);
+    const shouldShowGoThere = !isNearby;
     const fallbackWalkingMinutes = distanceInMeters !== null
         ? Math.max(1, Math.round(((distanceInMeters / 1000) / 4.8) * 60))
         : null;
@@ -165,41 +164,19 @@ function LockedTreePopup({ treeId, coords }) {
         };
     }, [setUserPosition]);
 
-    const handleUseLocation = () => {
+    const handleGoThere = () => {
         if (!navigator.geolocation) {
             setGeoStatus('unsupported');
             return;
         }
 
         setGeoStatus('loading');
-        navigator.geolocation.getCurrentPosition(
-            ({ coords: currentCoords }) => {
-                setUserPosition([currentCoords.latitude, currentCoords.longitude]);
-                setGeoStatus('ready');
-            },
-            () => {
-                setGeoStatus('error');
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000
-            }
-        );
-    };
+        startFollowingUser({ year: treeId, coords });
 
-    const handleGoThere = () => {
-        if (!mapData.mapObj) {
-            return;
+        if (mapData.mapObj && !userPosition) {
+            mapData.mapObj.closePopup();
+            mapData.mapObj.flyTo(coords, 17);
         }
-
-        if (userPosition) {
-            startFollowingUser();
-            return;
-        }
-
-        mapData.mapObj.closePopup();
-        mapData.mapObj.flyTo(coords, 17);
     };
 
     return (
@@ -224,10 +201,6 @@ function LockedTreePopup({ treeId, coords }) {
             {isNearby ? (
                 <button type="button" className="gamePopupButton" onClick={() => unlockTree(treeId)}>
                     <Text tid="gameUnlockCta" />
-                </button>
-            ) : !shouldShowGoThere ? (
-                <button type="button" className="gamePopupButton gamePopupButton--secondary" onClick={handleUseLocation}>
-                    {geoStatus === 'loading' ? <Text tid="nearestTreeLoading" /> : <Text tid="gameUseLocation" />}
                 </button>
             ) : null}
             {distanceInMeters !== null && !isNearby && (
@@ -488,8 +461,47 @@ function PopupStateWatcher({ setPopupOpen }) {
     return null;
 }
 
+function FollowMapInteractionWatcher({ isFollowingUser, setIsFollowMapCentered }) {
+    const map = useMap();
+    const markUserMapInteraction = useCallback(() => {
+        if (isFollowingUser) {
+            setIsFollowMapCentered(false);
+        }
+    }, [isFollowingUser, setIsFollowMapCentered]);
+
+    useEffect(() => {
+        const container = map.getContainer();
+        container.addEventListener('pointerdown', markUserMapInteraction, { passive: true });
+        container.addEventListener('touchstart', markUserMapInteraction, { passive: true });
+        container.addEventListener('wheel', markUserMapInteraction, { passive: true });
+
+        return () => {
+            container.removeEventListener('pointerdown', markUserMapInteraction);
+            container.removeEventListener('touchstart', markUserMapInteraction);
+            container.removeEventListener('wheel', markUserMapInteraction);
+        };
+    }, [map, markUserMapInteraction]);
+
+    useMapEvent('dragstart', markUserMapInteraction);
+    useMapEvent('zoomstart', markUserMapInteraction);
+
+    return null;
+}
+
+function RecenterIcon() {
+    return (
+        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+            <path d="M32 6v14" />
+            <path d="M32 44v14" />
+            <path d="M6 32h14" />
+            <path d="M44 32h14" />
+            <path d="M32 22l10 10-10 10-10-10z" />
+        </svg>
+    );
+}
+
 const InteractiveMap = () => {
-    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, setShowClouds, userPosition, routeToTree, dictionary, setPopupOpen, modalContent, requestedPopupTreeId, setRequestedPopupTreeId, popupOpen, locateNearestTree, hasUnlockedEveryTree, nearestTreeState } = useContext(PinContext);
+    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, setShowClouds, userPosition, routeToTree, dictionary, setPopupOpen, modalContent, requestedPopupTreeId, setRequestedPopupTreeId, popupOpen, locateNearestTree, hasUnlockedEveryTree, nearestTreeState, isFollowingUser, isFollowMapCentered, setIsFollowMapCentered, recenterFollowedUser } = useContext(PinContext);
 
     const [divHeight, setDivHeight] = useState(0);
     const markerRef = useRef([]);
@@ -576,6 +588,17 @@ const InteractiveMap = () => {
                 {nearestTreeState === 'loading' && (
                     <div className="mapLoadingOverlay" aria-hidden="true" />
                 )}
+                {!dm && isFollowingUser && !isFollowMapCentered && userPosition && (
+                    <button
+                        type="button"
+                        className="followRecenterButton"
+                        onClick={recenterFollowedUser}
+                        aria-label={dictionary.mapRecenterOnUserAction || 'Recenter on my position'}
+                        title={dictionary.mapRecenterOnUserAction || 'Recenter on my position'}
+                    >
+                        <RecenterIcon />
+                    </button>
+                )}
 
                 {dm === true &&
                     <div className={`modal${modalContent === 'intro' ? ' modal--intro' : ''}${modalContent === 'about' ? ' modal--about' : ''}${modalContent === 'tooFar' ? ' modal--compact' : ''}${modalContent === 'treeUnlocked' ? ' modal--unlock' : ''}${modalContent === 'gameVictory' ? ' modal--victory' : ''}${modalContent === 'species' ? ' modal--species' : ''}${modalContent === 'treasure' ? ' modal--treasure' : ''}`}>
@@ -589,6 +612,7 @@ const InteractiveMap = () => {
                     />
                     <MapInitializer setMapInstance={mapData.setMapObj} />
                     <PopupStateWatcher setPopupOpen={setPopupOpen} />
+                    <FollowMapInteractionWatcher isFollowingUser={isFollowingUser} setIsFollowMapCentered={setIsFollowMapCentered} />
 
                     <ListMarkers hover={tmppins} warning={setWarning} askedyear={yearselected} markerRef={markerRef} userLanguage={userLanguage} />
                     {userPosition && (

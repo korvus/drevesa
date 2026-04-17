@@ -17,6 +17,10 @@ const MAX_WALKING_TIME_MINUTES = 120;
 const LJUBLJANA_COORDS = [46.0507666, 14.5047565];
 const NEAREST_TREE_ZOOM = 17;
 const FOLLOW_USER_ZOOM = 17;
+const FOLLOW_ROUTE_RECALC_INTERVAL_MS = 20000;
+const FOLLOW_ROUTE_MIN_MOVE_METERS = 15;
+const FOLLOW_ROUTE_DEVIATION_THRESHOLD_METERS = 30;
+const FOLLOW_AUTO_UNLOCK_DISTANCE_METERS = 20;
 const MOBILE_NEAREST_TREE_OFFSET_RATIO = 0.22;
 const MOBILE_NEAREST_TREE_MAX_OFFSET_PX = 140;
 
@@ -44,6 +48,68 @@ function estimateWalkingDistanceInKm(directDistanceInKm) {
 function estimateWalkingTimeInMinutes(distanceInKm) {
     const averageWalkingSpeedKmPerHour = 4.8;
     return Math.max(1, Math.round((distanceInKm / averageWalkingSpeedKmPerHour) * 60));
+}
+
+function haversineDistanceInMeters(fromCoords, toCoords) {
+    return haversineDistanceInKm(fromCoords, toCoords) * 1000;
+}
+
+function projectCoordsToMeters(coords, originLat) {
+    const earthRadiusMeters = 6371000;
+    const toRadians = (degrees) => (degrees * Math.PI) / 180;
+    const [lat, lng] = coords;
+
+    return {
+        x: earthRadiusMeters * toRadians(lng) * Math.cos(toRadians(originLat)),
+        y: earthRadiusMeters * toRadians(lat)
+    };
+}
+
+function getDistanceToSegmentInMeters(point, segmentStart, segmentEnd) {
+    const originLat = point[0];
+    const projectedPoint = projectCoordsToMeters(point, originLat);
+    const projectedStart = projectCoordsToMeters(segmentStart, originLat);
+    const projectedEnd = projectCoordsToMeters(segmentEnd, originLat);
+    const segmentX = projectedEnd.x - projectedStart.x;
+    const segmentY = projectedEnd.y - projectedStart.y;
+    const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+
+    if (segmentLengthSquared === 0) {
+        return haversineDistanceInMeters(point, segmentStart);
+    }
+
+    const pointRatio = Math.max(
+        0,
+        Math.min(
+            1,
+            ((projectedPoint.x - projectedStart.x) * segmentX + (projectedPoint.y - projectedStart.y) * segmentY) / segmentLengthSquared
+        )
+    );
+    const closestPoint = {
+        x: projectedStart.x + pointRatio * segmentX,
+        y: projectedStart.y + pointRatio * segmentY
+    };
+    const deltaX = projectedPoint.x - closestPoint.x;
+    const deltaY = projectedPoint.y - closestPoint.y;
+
+    return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+}
+
+function getDistanceToRouteInMeters(point, routeCoords) {
+    if (!routeCoords || routeCoords.length < 2) {
+        return Infinity;
+    }
+
+    let shortestDistance = Infinity;
+
+    for (let index = 1; index < routeCoords.length; index++) {
+        shortestDistance = Math.min(
+            shortestDistance,
+            getDistanceToSegmentInMeters(point, routeCoords[index - 1], routeCoords[index])
+        );
+    }
+
+    return shortestDistance;
 }
 
 function getNearestTreeVerticalOffset(map) {
@@ -235,10 +301,31 @@ export const PinContextProvider = props => {
     const [selectedSpeciesId, setSelectedSpeciesId] = useState('');
     const [guidedTreeId, setGuidedTreeId] = useState('');
     const [isFollowingUser, setIsFollowingUser] = useState(false);
+    const [isFollowMapCentered, setIsFollowMapCentered] = useState(true);
     const followWatchIdRef = useRef(null);
     const lastFollowCenterTsRef = useRef(0);
+    const isFollowMapCenteredRef = useRef(true);
+    const followRouteTargetRef = useRef(null);
+    const lastRouteRefreshPositionRef = useRef(null);
+    const lastRouteRefreshTsRef = useRef(0);
+    const isRouteRefreshPendingRef = useRef(false);
+    const routeToTreeRef = useRef([]);
+    const nearestTreeRef = useRef(null);
+    const nextTreeSuggestionRef = useRef(null);
+    const unlockedTreesRef = useRef([]);
+    const unlockAllTreesRef = useRef(false);
+    const unlockTreeRef = useRef(null);
 
     const [mapObj, setMapObj] = useState(null);
+    const setFollowMapCentered = useCallback((nextValue) => {
+        const resolvedValue = typeof nextValue === 'function'
+            ? nextValue(isFollowMapCenteredRef.current)
+            : nextValue;
+
+        isFollowMapCenteredRef.current = resolvedValue;
+        setIsFollowMapCentered(resolvedValue);
+    }, []);
+
     const goToArea = (regionCoord, zoom = 13) => {
         setIsFollowingUser(false);
         if (mapObj) {
@@ -252,11 +339,132 @@ export const PinContextProvider = props => {
         goToArea: goToArea
     }
 
+    useEffect(() => {
+        routeToTreeRef.current = routeToTree;
+    }, [routeToTree]);
+
+    useEffect(() => {
+        nearestTreeRef.current = nearestTree;
+    }, [nearestTree]);
+
+    useEffect(() => {
+        nextTreeSuggestionRef.current = nextTreeSuggestion;
+    }, [nextTreeSuggestion]);
+
+    useEffect(() => {
+        unlockedTreesRef.current = unlockedTrees;
+    }, [unlockedTrees]);
+
+    useEffect(() => {
+        unlockAllTreesRef.current = unlockAllTrees;
+    }, [unlockAllTrees]);
+
+    useEffect(() => {
+        isFollowMapCenteredRef.current = isFollowMapCentered;
+    }, [isFollowMapCentered]);
+
+    const maybeRefreshFollowRoute = useCallback(async (nextPosition) => {
+        const target = followRouteTargetRef.current;
+
+        if (!target || isRouteRefreshPendingRef.current) {
+            return;
+        }
+
+        const hasCurrentRoute = routeToTreeRef.current && routeToTreeRef.current.length >= 2;
+        const now = Date.now();
+        if (hasCurrentRoute && now - lastRouteRefreshTsRef.current < FOLLOW_ROUTE_RECALC_INTERVAL_MS) {
+            return;
+        }
+
+        const lastRouteRefreshPosition = lastRouteRefreshPositionRef.current;
+        if (
+            hasCurrentRoute &&
+            lastRouteRefreshPosition &&
+            haversineDistanceInMeters(lastRouteRefreshPosition, nextPosition) < FOLLOW_ROUTE_MIN_MOVE_METERS
+        ) {
+            return;
+        }
+
+        if (hasCurrentRoute) {
+            const distanceToCurrentRoute = getDistanceToRouteInMeters(nextPosition, routeToTreeRef.current);
+            if (distanceToCurrentRoute <= FOLLOW_ROUTE_DEVIATION_THRESHOLD_METERS) {
+                return;
+            }
+        }
+
+        isRouteRefreshPendingRef.current = true;
+        lastRouteRefreshTsRef.current = now;
+
+        try {
+            const route = await fetchWalkingRoute(nextPosition, target.coords);
+            if (followRouteTargetRef.current !== target) {
+                return;
+            }
+
+            const nextRouteMeta = {
+                distanceInKm: route.distanceInKm,
+                durationInMinutes: route.durationInMinutes,
+                startSnapDistanceInMeters: route.startSnapDistanceInMeters,
+                endSnapDistanceInMeters: route.endSnapDistanceInMeters
+            };
+
+            lastRouteRefreshPositionRef.current = nextPosition;
+            routeToTreeRef.current = route.coordinates;
+            setRouteToTree(route.coordinates);
+            setRouteMeta(nextRouteMeta);
+
+            setNearestTree((currentNearestTree) => {
+                if (!currentNearestTree || currentNearestTree.year !== target.year) {
+                    return currentNearestTree;
+                }
+
+                return {
+                    ...currentNearestTree,
+                    directDistanceInKm: haversineDistanceInKm(nextPosition, target.coords),
+                    walkingDistanceInKm: route.distanceInKm,
+                    walkingTimeInMinutes: route.durationInMinutes
+                };
+            });
+
+            setNextTreeSuggestion((currentSuggestion) => {
+                if (!currentSuggestion || currentSuggestion.year !== target.year) {
+                    return currentSuggestion;
+                }
+
+                return {
+                    ...currentSuggestion,
+                    directDistanceInKm: haversineDistanceInKm(nextPosition, target.coords),
+                    walkingDistanceInKm: route.distanceInKm,
+                    walkingTimeInMinutes: route.durationInMinutes
+                };
+            });
+        } catch (error) {
+            // Keep the previous route if rerouting fails; the next eligible GPS update can retry.
+        } finally {
+            isRouteRefreshPendingRef.current = false;
+        }
+    }, []);
+
     const updateFollowedUserPosition = useCallback((coords) => {
         const nextPosition = [coords.latitude, coords.longitude];
+        const followTarget = followRouteTargetRef.current;
         setUserPosition(nextPosition);
+        maybeRefreshFollowRoute(nextPosition);
 
-        if (!mapObj) {
+        if (
+            followTarget &&
+            !unlockAllTreesRef.current &&
+            !unlockedTreesRef.current.includes(followTarget.year) &&
+            haversineDistanceInMeters(nextPosition, followTarget.coords) <= FOLLOW_AUTO_UNLOCK_DISTANCE_METERS
+        ) {
+            setIsFollowingUser(false);
+            if (unlockTreeRef.current) {
+                unlockTreeRef.current(followTarget.year);
+            }
+            return;
+        }
+
+        if (!mapObj || !isFollowMapCenteredRef.current) {
             return;
         }
 
@@ -268,7 +476,7 @@ export const PinContextProvider = props => {
         lastFollowCenterTsRef.current = now;
         const nextZoom = Math.max(mapObj.getZoom(), FOLLOW_USER_ZOOM);
         mapObj.setView(nextPosition, nextZoom, { animate: true });
-    }, [mapObj]);
+    }, [mapObj, maybeRefreshFollowRoute]);
 
     useEffect(() => {
         if (!isFollowingUser) {
@@ -276,6 +484,10 @@ export const PinContextProvider = props => {
                 navigator.geolocation.clearWatch(followWatchIdRef.current);
                 followWatchIdRef.current = null;
             }
+            followRouteTargetRef.current = null;
+            lastRouteRefreshPositionRef.current = null;
+            isRouteRefreshPendingRef.current = false;
+            setFollowMapCentered(true);
             return undefined;
         }
 
@@ -288,13 +500,15 @@ export const PinContextProvider = props => {
             ({ coords: currentCoords }) => {
                 updateFollowedUserPosition(currentCoords);
             },
-            () => {
-                setIsFollowingUser(false);
+            (error) => {
+                if (error && error.code === error.PERMISSION_DENIED) {
+                    setIsFollowingUser(false);
+                }
             },
             {
                 enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 2000
+                timeout: 20000,
+                maximumAge: 5000
             }
         );
 
@@ -304,14 +518,30 @@ export const PinContextProvider = props => {
                 followWatchIdRef.current = null;
             }
         };
-    }, [isFollowingUser, updateFollowedUserPosition]);
+    }, [isFollowingUser, setFollowMapCentered, updateFollowedUserPosition]);
 
-    const startFollowingUser = useCallback(() => {
+    const startFollowingUser = useCallback((target = null) => {
         if (typeof navigator === 'undefined' || !navigator.geolocation) {
             setNearestTreeState('unsupported');
             return;
         }
 
+        const nearestTarget = nearestTreeRef.current
+            ? { year: nearestTreeRef.current.year, coords: nearestTreeRef.current.coords }
+            : null;
+        const nextSuggestionTarget = nextTreeSuggestionRef.current
+            ? { year: nextTreeSuggestionRef.current.year, coords: nextTreeSuggestionRef.current.coords }
+            : null;
+        const followTarget = target || nearestTarget || nextSuggestionTarget;
+        followRouteTargetRef.current = followTarget;
+        routeToTreeRef.current = [];
+        lastRouteRefreshPositionRef.current = null;
+        lastRouteRefreshTsRef.current = 0;
+        isRouteRefreshPendingRef.current = false;
+        setRouteToTree([]);
+        setRouteMeta(null);
+        setGuidedTreeId(followTarget ? followTarget.year : '');
+        setFollowMapCentered(true);
         setIsFollowingUser(true);
         if (mapObj) {
             mapObj.closePopup();
@@ -319,7 +549,19 @@ export const PinContextProvider = props => {
                 mapObj.flyTo(userPosition, FOLLOW_USER_ZOOM);
             }
         }
-    }, [mapObj, userPosition]);
+
+        if (userPosition && followTarget) {
+            maybeRefreshFollowRoute(userPosition);
+        }
+    }, [mapObj, maybeRefreshFollowRoute, setFollowMapCentered, userPosition]);
+
+    const recenterFollowedUser = useCallback(() => {
+        setFollowMapCentered(true);
+
+        if (mapObj && userPosition) {
+            mapObj.flyTo(userPosition, Math.max(mapObj.getZoom(), FOLLOW_USER_ZOOM));
+        }
+    }, [mapObj, setFollowMapCentered, userPosition]);
 
     const focusAllTrees = useCallback(() => {
         if (!mapObj || ALL_TREE_COORDS.length === 0) {
@@ -422,6 +664,7 @@ export const PinContextProvider = props => {
             return nextUnlockedTrees;
         });
     };
+    unlockTreeRef.current = unlockTree;
 
     const unlockEveryTree = () => {
         setUnlockAllTrees(true);
@@ -645,7 +888,9 @@ export const PinContextProvider = props => {
         userLanguage: activeLanguage,
         userPosition, setUserPosition,
         isFollowingUser, setIsFollowingUser,
+        isFollowMapCentered, setIsFollowMapCentered: setFollowMapCentered,
         startFollowingUser,
+        recenterFollowedUser,
         routeToTree, setRouteToTree,
         routeMeta, setRouteMeta,
         popupOpen, setPopupOpen,

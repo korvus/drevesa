@@ -924,6 +924,115 @@ a {
   pointer-events: auto;
 }
 
+.followRecenterButton {
+  display: none;
+}
+
+.staticMapFallback {
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 3rem;
+  background: linear-gradient(180deg, #eef4ea, #e8e8e5);
+  color: #1f2521;
+  font-size: 1.6rem;
+  line-height: 1.5;
+}
+
+.staticMapFallback h2,
+.staticMapFallback h3,
+.staticMapFallback h4,
+.staticMapFallback p {
+  margin-top: 0;
+}
+
+.staticMapFallback h2 {
+  margin-bottom: 1.2rem;
+  font-size: 3.2rem;
+  line-height: 1.1;
+  color: #178040;
+}
+
+.staticMapFallback h3 {
+  margin-bottom: 1rem;
+  font-size: 2.1rem;
+  color: #245233;
+}
+
+.staticMapFallback a {
+  color: #178040;
+  font-weight: 700;
+}
+
+.staticHero,
+.staticGameSummary,
+.staticTreeList,
+.staticSource {
+  max-width: 92rem;
+  margin: 0 auto 2rem;
+}
+
+.staticHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 32rem);
+  gap: 1.8rem 2.4rem;
+  align-items: center;
+}
+
+.staticHero img {
+  grid-row: 1 / span 4;
+  grid-column: 2;
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  box-shadow: 0 16px 36px rgba(20, 57, 31, 0.16);
+}
+
+.staticEyebrow {
+  margin-bottom: 0.6rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7a55;
+}
+
+.staticGameSummary,
+.staticSource {
+  padding: 1.6rem 1.8rem;
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(23, 128, 64, 0.12);
+}
+
+.staticTreeList ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+  gap: 1.2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.staticTreeCard {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1.4rem 1.5rem;
+  background: rgba(255, 255, 255, 0.66);
+  border-top: 0.6rem solid #add19e;
+  box-shadow: 0 8px 20px rgba(20, 57, 31, 0.08);
+}
+
+.staticTreeCard h4 {
+  margin-bottom: 0.8rem;
+  font-size: 2rem;
+  color: #178040;
+}
+
+.staticTreeCard p {
+  margin-bottom: 0.8rem;
+}
+
 .treasurePanelLink {
   width: 100%;
   display: flex;
@@ -1380,6 +1489,19 @@ a {
     overflow: hidden;
   }
 
+  .staticMapFallback {
+    padding: 1.6rem;
+  }
+
+  .staticHero {
+    display: block;
+  }
+
+  .staticHero img {
+    width: min(100%, 32rem);
+    margin: 1.4rem auto 0;
+  }
+
   .nearestTreeButton--panel {
     display: none;
   }
@@ -1423,6 +1545,39 @@ a {
 
   .nearestTreeButton--desktopOverlay {
     display: none;
+  }
+
+  .followRecenterButton {
+    position: absolute;
+    right: 1.4rem;
+    bottom: 7.4rem;
+    z-index: 660;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5.6rem;
+    height: 5.6rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #178040;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+  }
+
+  .followRecenterButton svg {
+    width: 3rem;
+    height: 3rem;
+    display: block;
+  }
+
+  .followRecenterButton svg path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .nearestTreeFeedback--floating {

@@ -1,3 +1,4 @@
+import "leaflet/dist/leaflet.css";
 import './style/App.css';
 import './style/leaflet.css';
 import Col from './components/menu.js';
