@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import trees from '../datas/datas.json';
 import { PinContext, Text } from '../store';
 import carteExplication from '../img/carteExplication.png';
@@ -24,6 +24,86 @@ const rewardImages = {
     2023: reward2023,
     2024: reward2024,
 };
+
+const DONATION_BUTTON_CONFIG = {
+    color: '#178040',
+    size: 'sm',
+    borderRadius: 'md',
+    amount: '0.01',
+    recipientAddress: '0xbbb5052a25eEe56D0BEB0C7Ec995320F965d3137'
+};
+
+function DonationButtonEmbed({ dictionary }) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const sizeClassName = `donationEmbed__button donationEmbed__button--${DONATION_BUTTON_CONFIG.size || 'md'}`;
+    const radiusClassName = `donationEmbed__button donationEmbed__button--radius-${DONATION_BUTTON_CONFIG.borderRadius || 'md'}`;
+    const donationUrl = `https://fundhog.bunnylabs.dev/${encodeURIComponent(DONATION_BUTTON_CONFIG.recipientAddress)}`;
+    const buttonLabel = dictionary.donationCryptoButton || 'Buy me a coffee with ETH';
+    const closeLabel = dictionary.donationClose || 'Close donation window';
+
+    return (
+        <>
+            <div className="donationEmbed">
+                <button
+                    type="button"
+                    className={`${sizeClassName} ${radiusClassName}`}
+                    style={{ backgroundColor: DONATION_BUTTON_CONFIG.color }}
+                    onClick={() => setIsModalOpen(true)}
+                >
+                    {buttonLabel}
+                </button>
+            </div>
+            {isModalOpen && (
+                <div
+                    className="donationEmbed__overlay"
+                    onClick={() => setIsModalOpen(false)}
+                    role="presentation"
+                >
+                    <div
+                        className="donationEmbed__dialog"
+                        onClick={(event) => event.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={buttonLabel}
+                    >
+                        <button
+                            type="button"
+                            className="donationEmbed__close"
+                            onClick={() => setIsModalOpen(false)}
+                            aria-label={closeLabel}
+                        >
+                            ×
+                        </button>
+                        <iframe
+                            className="donationEmbed__iframe"
+                            src={donationUrl}
+                            title={buttonLabel}
+                            loading="lazy"
+                        />
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}
+
+function BuyMeACoffeeEmbed({ dictionary }) {
+    const buttonLabel = dictionary.donationClassicButton || 'Buy me a coffee with regular money';
+
+    return (
+        <div className="donationEmbed donationEmbed--bmc">
+            <a
+                className="donationEmbed__button donationEmbed__button--sm donationEmbed__button--radius-md donationEmbed__button--link"
+                href="https://buymeacoffee.com/ertelsimonu"
+                target="_blank"
+                rel="noreferrer"
+                style={{ backgroundColor: '#178040' }}
+            >
+                {buttonLabel}
+            </a>
+        </div>
+    );
+}
 
 const Modalcontent = () => {
     const { setDm, modalContent, locateNearestTree, unlockEveryTree, resetUnlockedPassport, recentlyUnlockedTreeId, selectedSpeciesId, openSpeciesModal, dictionary, userLanguage } = useContext(PinContext);
@@ -86,9 +166,17 @@ const Modalcontent = () => {
                 }
                 {modalContent === "contact" &&
                     <>
-                        <h2><Text tid="contact" /></h2>
-                        <div>
-                            <Text tid="links" />
+                        <div className="contactCopy">
+                            <h2><Text tid="contact" /></h2>
+                            <div>
+                                <Text tid="links" />
+                            </div>
+                            <div className="contactDonation">
+                                <div className="contactDonation__actions">
+                                    <DonationButtonEmbed dictionary={dictionary} />
+                                    <BuyMeACoffeeEmbed dictionary={dictionary} />
+                                </div>
+                            </div>
                         </div>
                     </>
                 }

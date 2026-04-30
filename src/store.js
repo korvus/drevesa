@@ -112,6 +112,98 @@ function getDistanceToRouteInMeters(point, routeCoords) {
     return shortestDistance;
 }
 
+function getProjectedPointOnSegment(point, segmentStart, segmentEnd) {
+    const originLat = point[0];
+    const projectedPoint = projectCoordsToMeters(point, originLat);
+    const projectedStart = projectCoordsToMeters(segmentStart, originLat);
+    const projectedEnd = projectCoordsToMeters(segmentEnd, originLat);
+    const segmentX = projectedEnd.x - projectedStart.x;
+    const segmentY = projectedEnd.y - projectedStart.y;
+    const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+
+    if (segmentLengthSquared === 0) {
+        return {
+            coords: segmentStart,
+            distanceInMeters: haversineDistanceInMeters(point, segmentStart)
+        };
+    }
+
+    const pointRatio = Math.max(
+        0,
+        Math.min(
+            1,
+            ((projectedPoint.x - projectedStart.x) * segmentX + (projectedPoint.y - projectedStart.y) * segmentY) / segmentLengthSquared
+        )
+    );
+    const closestPoint = {
+        x: projectedStart.x + pointRatio * segmentX,
+        y: projectedStart.y + pointRatio * segmentY
+    };
+    const deltaX = projectedPoint.x - closestPoint.x;
+    const deltaY = projectedPoint.y - closestPoint.y;
+    const projectedLng = closestPoint.x / (6371000 * Math.cos((originLat * Math.PI) / 180));
+    const projectedLat = closestPoint.y / 6371000;
+
+    return {
+        coords: [
+            (projectedLat * 180) / Math.PI,
+            (projectedLng * 180) / Math.PI
+        ],
+        distanceInMeters: Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+    };
+}
+
+function getRouteLengthInKm(routeCoords) {
+    if (!routeCoords || routeCoords.length < 2) {
+        return 0;
+    }
+
+    let totalDistance = 0;
+
+    for (let index = 1; index < routeCoords.length; index++) {
+        totalDistance += haversineDistanceInKm(routeCoords[index - 1], routeCoords[index]);
+    }
+
+    return totalDistance;
+}
+
+function getTrimmedRouteFromPoint(point, routeCoords) {
+    if (!routeCoords || routeCoords.length < 2) {
+        return null;
+    }
+
+    let closestSegmentIndex = 1;
+    let closestSegmentPoint = routeCoords[0];
+    let shortestDistance = Infinity;
+
+    for (let index = 1; index < routeCoords.length; index++) {
+        const projectedPoint = getProjectedPointOnSegment(point, routeCoords[index - 1], routeCoords[index]);
+
+        if (projectedPoint.distanceInMeters < shortestDistance) {
+            shortestDistance = projectedPoint.distanceInMeters;
+            closestSegmentIndex = index;
+            closestSegmentPoint = projectedPoint.coords;
+        }
+    }
+
+    const remainingRoute = [
+        point,
+        closestSegmentPoint,
+        ...routeCoords.slice(closestSegmentIndex)
+    ].filter((coords, index, array) => {
+        if (index === 0) {
+            return true;
+        }
+
+        return haversineDistanceInMeters(array[index - 1], coords) > 1;
+    });
+
+    return {
+        coordinates: remainingRoute,
+        distanceInKm: getRouteLengthInKm(remainingRoute)
+    };
+}
+
 function getNearestTreeVerticalOffset(map) {
     if (typeof window === 'undefined' || !window.matchMedia('(orientation: portrait)').matches) {
         return 0;
@@ -459,6 +551,49 @@ export const PinContextProvider = props => {
         const nextPosition = [coords.latitude, coords.longitude];
         const followTarget = followRouteTargetRef.current;
         setUserPosition(nextPosition);
+
+        if (followTarget && routeToTreeRef.current && routeToTreeRef.current.length >= 2) {
+            const trimmedRoute = getTrimmedRouteFromPoint(nextPosition, routeToTreeRef.current);
+
+            if (trimmedRoute) {
+                routeToTreeRef.current = trimmedRoute.coordinates;
+                setRouteToTree(trimmedRoute.coordinates);
+
+                const nextDurationInMinutes = estimateWalkingTimeInMinutes(trimmedRoute.distanceInKm);
+                setRouteMeta((currentRouteMeta) => currentRouteMeta ? {
+                    ...currentRouteMeta,
+                    distanceInKm: trimmedRoute.distanceInKm,
+                    durationInMinutes: nextDurationInMinutes
+                } : currentRouteMeta);
+
+                setNearestTree((currentNearestTree) => {
+                    if (!currentNearestTree || currentNearestTree.year !== followTarget.year) {
+                        return currentNearestTree;
+                    }
+
+                    return {
+                        ...currentNearestTree,
+                        directDistanceInKm: haversineDistanceInKm(nextPosition, followTarget.coords),
+                        walkingDistanceInKm: trimmedRoute.distanceInKm,
+                        walkingTimeInMinutes: nextDurationInMinutes
+                    };
+                });
+
+                setNextTreeSuggestion((currentSuggestion) => {
+                    if (!currentSuggestion || currentSuggestion.year !== followTarget.year) {
+                        return currentSuggestion;
+                    }
+
+                    return {
+                        ...currentSuggestion,
+                        directDistanceInKm: haversineDistanceInKm(nextPosition, followTarget.coords),
+                        walkingDistanceInKm: trimmedRoute.distanceInKm,
+                        walkingTimeInMinutes: nextDurationInMinutes
+                    };
+                });
+            }
+        }
+
         maybeRefreshFollowRoute(nextPosition);
 
         if (
@@ -972,7 +1107,7 @@ export function Text({ tid, classLink, as: Wrapper = 'div' }) {
 
     let str = languageContext.dictionary[tid] ? languageContext.dictionary[tid] : "";
 
-    const matchGlobal = str.match(/\[a href='(.*?)'\](.*?)\[\/a\]|\[strong\](.*?)\[\/strong\]|\[br\]/g);
+    const matchGlobal = str.match(/\[a href='(.*?)'\](.*?)\[\/a\]|\[strong\](.*?)\[\/strong\]|\[lang=['"](.*?)['"]\](.*?)\[\/lang\]|\[br\]/g);
 
     if (matchGlobal) {
         let replaced = str;
@@ -980,6 +1115,7 @@ export function Text({ tid, classLink, as: Wrapper = 'div' }) {
             // console.log("matchGlobal", match);
             let regexLink = /\[a href='(.*?)'\](.*?)\[\/a\]/;
             let regexStrong = /\[strong\](.*?)\[\/strong\]/;
+            let regexLang = /\[lang=['"](.*?)['"]\](.*?)\[\/lang\]/;
             let regexBr = /\[br\]/;
             if (regexLink.test(match)) {
                 const [, link, text] = match.match(regexLink);
@@ -991,6 +1127,12 @@ export function Text({ tid, classLink, as: Wrapper = 'div' }) {
                 const [, text] = match.match(regexStrong);
                 replaced = ReactStringReplace(replaced, match, () => {
                     return <strong>{text}</strong>
+                });
+            };
+            if (regexLang.test(match)) {
+                const [, lang, text] = match.match(regexLang);
+                replaced = ReactStringReplace(replaced, match, () => {
+                    return <span lang={lang}>{text}</span>
                 });
             };
             if (regexBr.test(match)) {
