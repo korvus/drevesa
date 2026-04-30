@@ -85,8 +85,18 @@ const Seo = () => {
     const keywords = dictionary.seoKeywords || 'Ljubljana tree of the year, Drevesa, Ljubljana trees map';
     const imageAlt = dictionary.seoImageAlt || "Illustration of Ljubljana's Tree of the Year badge";
     const websiteName = 'Drevesa';
+    const noscriptContent = userLanguage === 'fr'
+      ? 'Vous devez activer JavaScript pour utiliser cette application.'
+      : userLanguage === 'sl'
+        ? 'Za uporabo te aplikacije morate omogočiti JavaScript.'
+        : 'You need to enable JavaScript to run this app.';
 
     document.title = title;
+
+    const noscriptElement = document.body.querySelector('noscript');
+    if (noscriptElement) {
+      noscriptElement.textContent = noscriptContent;
+    }
 
     upsertMeta('meta[name="description"]', { name: 'description' }, description);
     upsertMeta('meta[name="keywords"]', { name: 'keywords' }, keywords);
