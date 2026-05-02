@@ -20,6 +20,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "postbuild": "react-snap",
+    "export:tour": "node scripts/export-tree-tour.mjs",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
