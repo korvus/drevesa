@@ -29,20 +29,20 @@ const rewardImages = {
 const TREE_LINED_YEAR_IDS = new Set(['2023']);
 
 function WeatherGlyph({ weatherCode }) {
-    let icon = 'â˜';
+    let icon = '\u2601';
 
     if (weatherCode === 0 || weatherCode === 1) {
-        icon = 'â˜€';
+        icon = '\u2600';
     } else if (weatherCode === 2) {
-        icon = 'â›…';
+        icon = '\u26C5';
     } else if (weatherCode === 3 || weatherCode === 45 || weatherCode === 48) {
-        icon = 'â˜';
+        icon = '\u2601';
     } else if ((weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) {
-        icon = 'â˜”';
+        icon = '\u2614';
     } else if ((weatherCode >= 71 && weatherCode <= 77) || weatherCode === 85 || weatherCode === 86) {
-        icon = 'â„';
+        icon = '\u2744';
     } else if (weatherCode >= 95) {
-        icon = 'âš¡';
+        icon = '\u26A1';
     }
 
     return <span className="cityInfoWeatherGlyph" aria-hidden="true">{icon}</span>;
@@ -59,11 +59,10 @@ function OxygenIcon() {
 }
 
 const DONATION_BUTTON_CONFIG = {
+    recipientAddress: 'ertelsimonu.eth',
     color: '#178040',
-    size: 'sm',
-    borderRadius: 'md',
-    amount: '0.01',
-    recipientAddress: '0xbbb5052a25eEe56D0BEB0C7Ec995320F965d3137'
+    size: 'md',
+    borderRadius: 'md'
 };
 
 function DonationButtonEmbed({ dictionary }) {
@@ -105,7 +104,7 @@ function DonationButtonEmbed({ dictionary }) {
                             onClick={() => setIsModalOpen(false)}
                             aria-label={closeLabel}
                         >
-                            Ã—
+                            {'\u00D7'}
                         </button>
                         <iframe
                             className="donationEmbed__iframe"
@@ -322,7 +321,7 @@ const Modalcontent = () => {
                 value: oxygenInfoEstimate.profile.leafAreaHighM2,
                 min: 540,
                 max: 980,
-                formatValue: (value) => `${oxygenInfoNumberFormatter.format(Math.round(value))} mÂ²`,
+                formatValue: (value) => `${oxygenInfoNumberFormatter.format(Math.round(value))} m\u00B2`,
                 minTid: 'oxygenInfoLeafAreaMin',
                 maxTid: 'oxygenInfoLeafAreaMax'
             },
@@ -632,7 +631,7 @@ const Modalcontent = () => {
                                     <section className="cityInfoNowPanel">
                                         <article className="cityInfoNowRow cityInfoNowRow--hero">
                                             <div className="cityInfoHero__main">
-                                                <div className="cityInfoHero__temperature">{cityInfoState.data.current.temperature} Â°C</div>
+                                                <div className="cityInfoHero__temperature">{cityInfoState.data.current.temperature} {'\u00B0'}C</div>
                                                 <div className="cityInfoHero__weather">
                                                     <WeatherGlyph weatherCode={cityInfoState.data.current.weatherCode} />
                                                     <span>{cityInfoState.data.current.weatherLabel}</span>
@@ -696,8 +695,8 @@ const Modalcontent = () => {
                                                             {day.aqi}
                                                         </div>
                                                         <div className="cityInfoForecastRow__temps">
-                                                            <strong>{day.temperatureMax}Â°</strong>
-                                                            <span>{day.temperatureMin}Â°</span>
+                                                            <strong>{day.temperatureMax}{'\u00B0'}</strong>
+                                                            <span>{day.temperatureMin}{'\u00B0'}</span>
                                                         </div>
                                                         <div className="cityInfoForecastRow__meta">
                                                             <span>{day.windSpeed} km/h</span>
@@ -828,7 +827,7 @@ const Modalcontent = () => {
                                         <span className="unlockOxygenInfoRow">
                                             <span className="unlockOxygenTag">
                                             <span className="unlockOxygenTag__icon"><OxygenIcon /></span>
-                                            <span className="unlockOxygenTag__value">â‰ƒ {unlockedTreeOxygenPerHour}g Oâ‚‚ / h</span>
+                                            <span className="unlockOxygenTag__value">{'\u2243'} {unlockedTreeOxygenPerHour}g O{'\u2082'} / h</span>
                                             </span>
                                             {unlockedTreeEnvironment.data?.current && (
                                                 <button
@@ -895,15 +894,15 @@ const Modalcontent = () => {
                             <p className="oxygenInfoLead"><Text tid="oxygenInfoLead" /></p>
                             <div className="oxygenInfoCards">
                                 <div className="oxygenInfoCard">
-                                    <strong>{oxygenInfoNumberFormatter.format(Math.round(oxygenInfoEstimate.gramsPerHourIdeal))}g Oâ‚‚ / h</strong>
+                                    <strong>{oxygenInfoNumberFormatter.format(Math.round(oxygenInfoEstimate.gramsPerHourIdeal))}g O{'\u2082'} / h</strong>
                                     <span><Text tid="oxygenInfoIdealHourly" /></span>
                                 </div>
                                 <div className="oxygenInfoCard">
-                                    <strong>{oxygenInfoNumberFormatter.format(Math.round(oxygenInfoEstimate.gramsPerHour))}g Oâ‚‚ / h</strong>
+                                    <strong>{oxygenInfoNumberFormatter.format(Math.round(oxygenInfoEstimate.gramsPerHour))}g O{'\u2082'} / h</strong>
                                     <span><Text tid="oxygenInfoAdjustedHourly" /></span>
                                 </div>
                                 <div className="oxygenInfoCard">
-                                    <strong>{oxygenInfoNumberFormatter.format(Math.round(oxygenInfoEstimate.gramsDuringWalk))}g Oâ‚‚</strong>
+                                    <strong>{oxygenInfoNumberFormatter.format(Math.round(oxygenInfoEstimate.gramsDuringWalk))}g O{'\u2082'}</strong>
                                     <span><Text tid="oxygenInfoForDuration" /></span>
                                 </div>
                             </div>
@@ -972,12 +971,12 @@ const Modalcontent = () => {
                                                                     top: `${oxygenInfoCurrentTemperaturePoint.yPercent}%`
                                                                 }}
                                                             >
-                                                                <strong>{oxygenInfoNumberFormatter.format(Math.round(oxygenInfoCurrentTemperaturePoint.temperature))}Â°C</strong>
+                                                                <strong>{oxygenInfoNumberFormatter.format(Math.round(oxygenInfoCurrentTemperaturePoint.temperature))}{'\u00B0'}C</strong>
                                                             </div>
                                                         )}
                                                         <div className="oxygenInfoTemperatureChart__labels">
                                                             {oxygenInfoTemperatureSamples.filter((sample) => sample.showLabel).map((sample) => (
-                                                                <span key={sample.temperature}>{sample.temperature}Â°</span>
+                                                                <span key={sample.temperature}>{sample.temperature}{'\u00B0'}</span>
                                                             ))}
                                                         </div>
                                                     </div>
@@ -991,7 +990,7 @@ const Modalcontent = () => {
                                                             <div
                                                                 key={sample.key}
                                                                 className={`oxygenInfoSeasonChart__item${sample.isCurrent ? ' oxygenInfoSeasonChart__item--current' : ''}`}
-                                                                title={`${dictionary[sample.labelTid] || sample.key} Â· ${oxygenInfoFactorFormatter.format(sample.value)}`}
+                                                                title={`${dictionary[sample.labelTid] || sample.key} \u00B7 ${oxygenInfoFactorFormatter.format(sample.value)}`}
                                                             >
                                                                 <div className="oxygenInfoSeasonChart__column">
                                                                     <div
@@ -1019,7 +1018,7 @@ const Modalcontent = () => {
                                                             <div
                                                                 key={sample.hour}
                                                                 className={`oxygenInfoDaylightChart__item${sample.isCurrent ? ' oxygenInfoDaylightChart__item--current' : ''}`}
-                                                                title={`${sample.label} Â· ${oxygenInfoFactorFormatter.format(sample.value)}`}
+                                                                title={`${sample.label} \u00B7 ${oxygenInfoFactorFormatter.format(sample.value)}`}
                                                             >
                                                                 <div className="oxygenInfoDaylightChart__column">
                                                                     {sample.hour === oxygenInfoDaylightExtremes.minIndex && (
@@ -1055,7 +1054,7 @@ const Modalcontent = () => {
                             </div>
                             <p className="oxygenInfoMeta">
                                 <strong><Text tid="oxygenInfoWalkDuration" /></strong> {oxygenInfoNumberFormatter.format(Math.round(oxygenInfoEstimate.walkingTimeInMinutes))} min
-                                {oxygenInfoContext.temperature != null ? ` Â· ${dictionary.oxygenInfoTemperatureInput || 'Temperature used'} ${oxygenInfoFactorFormatter.format(oxygenInfoContext.temperature)} Â°C` : ''}
+                                {oxygenInfoContext.temperature != null ? ` \u00B7 ${dictionary.oxygenInfoTemperatureInput || 'Temperature used'} ${oxygenInfoFactorFormatter.format(oxygenInfoContext.temperature)} \u00B0C` : ''}
                             </p>
                             <p className="oxygenInfoDisclaimer"><Text tid="oxygenInfoDisclaimer" /></p>
                         </div>

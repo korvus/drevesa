@@ -123,7 +123,7 @@ function renderMetricTag({ icon, label, value, unit, approximate = false }) {
         <span className="nearestTreeTag">
             <span className="nearestTreeTag__icon">{icon}</span>
             <span className="nearestTreeTag__value">
-                {approximate ? 'Ã¢â€°Æ’ ' : ''}
+                {approximate ? '\u2243 ' : ''}
                 {value}
                 {formattedUnit}
             </span>
@@ -187,7 +187,7 @@ function renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, use
                             icon: <OxygenIcon />,
                             label: dictionary.nearestTreeMetricO2 ?? 'produit',
                             value: formattedOxygen,
-                            unit: dictionary.nearestTreeMetricO2Unit ?? 'g O2',
+                            unit: dictionary.nearestTreeMetricO2Unit ?? 'g O\u2082',
                             approximate: true
                             })}
                             {onOpenOxygenInfo ? (
@@ -224,9 +224,9 @@ function renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, use
                 })}
                 {renderMetricTag({
                     icon: <Co2Icon />,
-                    label: dictionary.nearestTreeMetricCo2 ?? 'Exhaled CO2',
+                    label: dictionary.nearestTreeMetricCo2 ?? 'Exhaled CO\u2082',
                     value: formattedCo2,
-                    unit: dictionary.nearestTreeMetricCo2Unit ?? 'g CO2',
+                    unit: dictionary.nearestTreeMetricCo2Unit ?? 'g CO\u2082',
                     approximate: true
                 })}
             </div>
@@ -589,7 +589,7 @@ const Col = () => {
                         aria-label={dictionary.close || 'Fermer'}
                         title={dictionary.close || 'Fermer'}
                     >
-                        Ãƒâ€”
+                        {'\u00D7'}
                     </button>
                     {nearestTreeFeedbackFloating}
                 </div>

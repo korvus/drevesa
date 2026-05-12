@@ -325,8 +325,8 @@ function LockedTreePopup({ treeId, treeName, coords, isMobileViewport = false })
             {contextSentence && formattedContextCo2 && formattedContextO2 ? (
                 <p className="gamePopupContextBand">
                     {renderStrongTemplate(contextSentence, {
-                        '{co2}': `${formattedContextCo2}${dictionary.nearestTreeMetricCo2Unit ?? 'g COâ‚‚'}`,
-                        '{o2}': `${formattedContextO2}${dictionary.nearestTreeMetricO2Unit ?? 'g Oâ‚‚'}`
+                        '{co2}': `${formattedContextCo2}${dictionary.nearestTreeMetricCo2Unit ?? 'g CO\u2082'}`,
+                        '{o2}': `${formattedContextO2}${dictionary.nearestTreeMetricO2Unit ?? 'g O\u2082'}`
                     })}
                 </p>
             ) : null}
@@ -455,7 +455,7 @@ function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
                             <div className="popupOxygenInfoRow">
                                 <div className="popupOxygenTag">
                                 <span className="popupOxygenTag__icon"><OxygenIcon /></span>
-                                <span className="popupOxygenTag__value">ÃƒÂ¢Ã¢â‚¬Â°Ã†â€™ {formattedOxygenPerHour}g OÃƒÂ¢Ã¢â‚¬Å¡Ã¢â‚¬Å¡ / h</span>
+                                <span className="popupOxygenTag__value">{'\u2243'} {formattedOxygenPerHour}g O\u2082 / h</span>
                                 </div>
                                 <button type="button" className="oxygenInfoButton oxygenInfoButton--popup" onClick={handleOpenOxygenInfo}>
                                     <Text tid="oxygenInfoAction" />
@@ -922,6 +922,5 @@ const InteractiveMap = () => {
 };
 
 export default InteractiveMap;
-
 
 

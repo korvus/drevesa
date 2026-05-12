@@ -1379,6 +1379,8 @@ a {
     padding-left: 3rem;
     padding-right: 3rem;
     box-sizing: border-box;
+    border-bottom-right-radius: 50%;
+    border-top-right-radius: 20%;
   }
 
   .nearestTreeSummary__header {
