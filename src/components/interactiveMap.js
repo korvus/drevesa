@@ -455,7 +455,7 @@ function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
                             <div className="popupOxygenInfoRow">
                                 <div className="popupOxygenTag">
                                 <span className="popupOxygenTag__icon"><OxygenIcon /></span>
-                                <span className="popupOxygenTag__value">{'\u2243'} {formattedOxygenPerHour}g O\u2082 / h</span>
+                                <span className="popupOxygenTag__value">{'\u2243'} {formattedOxygenPerHour}g O{'\u2082'} / h</span>
                                 </div>
                                 <button type="button" className="oxygenInfoButton oxygenInfoButton--popup" onClick={handleOpenOxygenInfo}>
                                     <Text tid="oxygenInfoAction" />
@@ -922,5 +922,4 @@ const InteractiveMap = () => {
 };
 
 export default InteractiveMap;
-
 
