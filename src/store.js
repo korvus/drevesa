@@ -872,9 +872,21 @@ export const PinContextProvider = props => {
     };
 
     const resetUnlockedPassport = () => {
+        setIsFollowingUser(false);
         setUnlockAllTrees(false);
         setUnlockedTrees([]);
+        setRouteToTree([]);
+        setRouteMeta(null);
+        setNearestTree(null);
+        setNearestTreeState('idle');
         setNextTreeSuggestion(null);
+        setGuidedTreeId('');
+        setYearselected(0);
+        setRequestedPopupTreeId('');
+        setPopupOpen(false);
+        if (mapObj) {
+            mapObj.closePopup();
+        }
         persistGameState({ unlockedTrees: [], unlockAllTrees: false });
     };
 
