@@ -18,14 +18,55 @@ import speciesDetails from '../datas/speciesDetails.js';
 import herbierFerme from '../img/herbierFerme.png';
 import treasure from '../img/treasure.png';
 import carteExplication from '../img/carteExplication.png';
+import { fetchLjubljanaCityInfo } from '../utils/ljubljanaCityInfo.js';
+import { estimateTreeOxygenForWalk } from '../utils/treeOxygenEstimate.js';
 
 const Ljubljana = [46.0507666, 14.5047565];
-const listDate = Object.keys(coords);
+const EXCLUDED_TREE_YEARS = new Set(['2023']);
+const listDate = Object.keys(coords).filter((year) => !EXCLUDED_TREE_YEARS.has(year));
 const GAME_DISTANCE_THRESHOLD_METERS = 20;
+const MAX_WALKING_TIME_MINUTES = 120;
 const MOBILE_BREAKPOINT_PX = 767;
 const MOBILE_POPUP_OFFSET = [0, 28];
-const MOBILE_POPUP_TOP_LEFT_PADDING = [12, 188];
+const MOBILE_POPUP_TOP_LEFT_PADDING = [12, 320];
 const MOBILE_POPUP_BOTTOM_RIGHT_PADDING = [12, 28];
+
+function WeatherGlyph({ weatherCode }) {
+    let icon = '\u2601';
+
+    if (weatherCode === 0 || weatherCode === 1) {
+        icon = '\u2600';
+    } else if (weatherCode === 2) {
+        icon = '\u26C5';
+    } else if (weatherCode === 3 || weatherCode === 45 || weatherCode === 48) {
+        icon = '\u2601';
+    } else if ((weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) {
+        icon = '\u2614';
+    } else if ((weatherCode >= 71 && weatherCode <= 77) || weatherCode === 85 || weatherCode === 86) {
+        icon = '\u2744';
+    } else if (weatherCode >= 95) {
+        icon = '\u26A1';
+    }
+
+    return <span className="mapCityInfoTag__weather" aria-hidden="true">{icon}</span>;
+}
+
+function renderStrongTemplate(template, replacements) {
+    const tokenPattern = /(\{[a-zA-Z0-9_]+\})/g;
+
+    return template
+        .split(tokenPattern)
+        .filter(Boolean)
+        .map((part, index) => {
+            const replacement = replacements[part];
+
+            if (replacement == null) {
+                return part;
+            }
+
+            return <strong key={`${part}-${index}`}>{replacement}</strong>;
+        });
+}
 
 function formatDistance(distanceInKm, language) {
     if (distanceInKm < 1) {
@@ -53,6 +94,40 @@ function WalkingIcon() {
     );
 }
 
+function DistanceIcon() {
+    return (
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 16c0-4.4 3.6-8 8-8" />
+            <path d="M12 8h7" />
+            <path d="M16 4l4 4-4 4" />
+            <circle cx="7" cy="17" r="2.4" />
+        </svg>
+    );
+}
+
+function StopwatchIcon() {
+    return (
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 5.2a7.8 7.8 0 1 0 7.8 7.8A7.81 7.81 0 0 0 12 5.2Zm0 14.6A6.8 6.8 0 1 1 18.8 13 6.81 6.81 0 0 1 12 19.8Z" />
+            <path d="M10.1 2.8h3.8" />
+            <path d="M12 5.2V2.8" />
+            <path d="M16.1 6.1l1.8-1.8" />
+            <path d="M12 13V9.1" />
+            <path d="M12 13h3.2" />
+        </svg>
+    );
+}
+
+function OxygenIcon() {
+    return (
+        <svg className="oxygenIcon" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+            <path d="m228.7,129.4c-54.6,0-98.9,44.3-98.9,98.9s44.3,98.9 98.9,98.9 98.9-44.3 98.9-98.9-44.3-98.9-98.9-98.9zm0,162.7c-35.2,0-63.8-28.6-63.8-63.8s28.6-63.8 63.8-63.8 63.8,28.6 63.8,63.8-28.5,63.8-63.8,63.8z" />
+            <path d="M398.3,11H113.7C57.1,11,11,57.1,11,113.7v284.6C11,454.9,57.1,501,113.7,501h284.6c56.6,0,102.7-46.1,102.7-102.7V113.7C501,57.1,454.9,11,398.3,11z M460.2,398.3c0,34.1-27.8,61.9-61.9,61.9H113.7c-34.1,0-61.9-27.8-61.9-61.9V113.7c0-34.1,27.8-61.9,61.9-61.9h284.6c34.1,0,61.9,27.8,61.9,61.9V398.3z" />
+            <path d="m363.8,349.4c6.1-6.3 10.2-11.5 12.4-15.5 2.2-4 3.4-8.3 3.4-12.7 0-8.1-2.8-14.5-8.4-19.2-5.6-4.7-12.1-7-19.5-7-7.4,0-13.5,1.6-18.3,4.8-4.8,3.2-9.2,7.9-13.2,14.1l15.3,9.1c4.8-7.7 9.9-11.5 15.3-11.5 2.9,0 5.4,1 7.2,2.9 1.9,1.9 2.8,4.3 2.8,7.2 0,2.9-1.1,5.8-3.3,8.9-2.2,3.1-5.8,7.2-10.8,12.3l-25.1,25.7v14.2h60.4v-17.2h-33.8l15.6-16.1z" />
+        </svg>
+    );
+}
+
 function haversineDistanceInMeters(fromCoords, toCoords) {
     const toRadians = (degrees) => (degrees * Math.PI) / 180;
     const earthRadiusMeters = 6371000;
@@ -70,10 +145,11 @@ function haversineDistanceInMeters(fromCoords, toCoords) {
     return earthRadiusMeters * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function LockedTreePopup({ treeId, coords }) {
-    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, nextTreeSuggestion, routeToTree, routeMeta, userLanguage, mapData, startFollowingUser, isFollowingUser } = useContext(PinContext);
+function LockedTreePopup({ treeId, treeName, coords, isMobileViewport = false }) {
+    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, nextTreeSuggestion, routeToTree, routeMeta, userLanguage, mapData, startFollowingUser, isFollowingUser, dictionary } = useContext(PinContext);
     const [distanceInMeters, setDistanceInMeters] = useState(null);
     const [geoStatus, setGeoStatus] = useState('idle');
+    const [treeEnvironment, setTreeEnvironment] = useState({ status: 'idle', current: null });
     const watchIdRef = useRef(null);
     const lastPositionRef = useRef(null);
     const lastUpdateTsRef = useRef(0);
@@ -92,7 +168,6 @@ function LockedTreePopup({ treeId, coords }) {
     const isNearby = distanceInMeters !== null && distanceInMeters <= GAME_DISTANCE_THRESHOLD_METERS;
     const hasRouteToThisTree = routeToTree.length > 1 && (isGuidedTree || isNearestTree);
     const isFollowingThisTree = isFollowingUser && isGuidedTree;
-    const shouldShowGoThere = !isNearby && !isFollowingThisTree;
     const fallbackWalkingMinutes = distanceInMeters !== null
         ? Math.max(1, Math.round(((distanceInMeters / 1000) / 4.8) * 60))
         : null;
@@ -116,6 +191,52 @@ function LockedTreePopup({ treeId, coords }) {
             ? `${distanceInMeters} m`
             : null;
     const estimatedWalkingMinutes = routedWalkingMinutes ?? fallbackWalkingMinutes;
+    const exceedsMaxWalkingTime = estimatedWalkingMinutes !== null && estimatedWalkingMinutes > MAX_WALKING_TIME_MINUTES;
+    const shouldShowGoThere = !isNearby && !isFollowingThisTree && !exceedsMaxWalkingTime;
+    const distanceForEstimateInKm = routedDistanceInKm ?? (distanceInMeters !== null ? distanceInMeters / 1000 : null);
+    const estimatedCalories = distanceForEstimateInKm !== null
+        ? Math.max(1, Math.round(distanceForEstimateInKm * 52.5))
+        : null;
+    const estimatedCo2Grams = estimatedCalories !== null
+        ? Math.max(1, Math.round(estimatedCalories * 0.39))
+        : null;
+    const oxygenEstimate = treeEnvironment.current && estimatedWalkingMinutes !== null
+        ? estimateTreeOxygenForWalk({
+            speciesId: treeName,
+            walkingTimeInMinutes: estimatedWalkingMinutes,
+            weatherCode: treeEnvironment.current.weatherCode,
+            temperature: treeEnvironment.current.temperature,
+            sunrise: treeEnvironment.current.sunrise,
+            sunset: treeEnvironment.current.sunset,
+            currentTime: treeEnvironment.current.time
+        })
+        : null;
+    const formattedContextCo2 = estimatedCo2Grams !== null
+        ? new Intl.NumberFormat(userLanguage === 'sl' ? 'sl-SI' : userLanguage === 'fr' ? 'fr-FR' : 'en-GB', { maximumFractionDigits: 0 }).format(estimatedCo2Grams)
+        : null;
+    const formattedContextO2 = oxygenEstimate
+        ? new Intl.NumberFormat(userLanguage === 'sl' ? 'sl-SI' : userLanguage === 'fr' ? 'fr-FR' : 'en-GB', { maximumFractionDigits: 0 }).format(Math.round(oxygenEstimate.gramsDuringWalk))
+        : null;
+    const contextSentence = dictionary.nearestTreeContextSentence || null;
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        fetchLjubljanaCityInfo(userLanguage, controller.signal)
+            .then((data) => {
+                setTreeEnvironment({
+                    status: 'ready',
+                    current: data.current
+                });
+            })
+            .catch((error) => {
+                if (error.name !== 'AbortError') {
+                    setTreeEnvironment({ status: 'error', current: null });
+                }
+            });
+
+        return () => controller.abort();
+    }, [userLanguage]);
 
     useEffect(() => {
         if (!navigator.geolocation) {
@@ -185,16 +306,30 @@ function LockedTreePopup({ treeId, coords }) {
         <div className="gamePopup">
             <span className="title">{treeId}</span>
             <p><Text tid="gameLockedIntro" /></p>
-            {distanceLabel !== null && (
-                <p className="popupMetric">
-                    <Text tid="gameLockedDistance" /> <strong>{distanceLabel}.</strong>
-                </p>
+            {(distanceLabel !== null || estimatedWalkingMinutes !== null) && (
+                <div className="gamePopupMetrics">
+                    {!isMobileViewport && distanceLabel !== null && (
+                        <span className="nearestTreeTag nearestTreeTag--popup">
+                            <span className="nearestTreeTag__icon"><DistanceIcon /></span>
+                            <span className="nearestTreeTag__value">{distanceLabel}</span>
+                        </span>
+                    )}
+                    {estimatedWalkingMinutes !== null && (
+                        <span className="nearestTreeTag nearestTreeTag--popup">
+                            <span className="nearestTreeTag__icon"><StopwatchIcon /></span>
+                            <span className="nearestTreeTag__value">{estimatedWalkingMinutes} <Text tid="nearestTreeMinutesShort" /></span>
+                        </span>
+                    )}
+                </div>
             )}
-            {estimatedWalkingMinutes !== null && (
-                <p className="popupMetric">
-                    <Text tid="gameLockedDuration" /> <strong>{estimatedWalkingMinutes} <Text tid="nearestTreeMinutes" />.</strong>
+            {contextSentence && formattedContextCo2 && formattedContextO2 ? (
+                <p className="gamePopupContextBand">
+                    {renderStrongTemplate(contextSentence, {
+                        '{co2}': `${formattedContextCo2}${dictionary.nearestTreeMetricCo2Unit ?? 'g COâ‚‚'}`,
+                        '{o2}': `${formattedContextO2}${dictionary.nearestTreeMetricO2Unit ?? 'g Oâ‚‚'}`
+                    })}
                 </p>
-            )}
+            ) : null}
             {shouldShowGoThere && (
                 <button type="button" className="gamePopupButton gamePopupButton--secondary" onClick={handleGoThere}>
                     <Text tid={hasRouteToThisTree ? "gameStartFollowing" : "gameGoThere"} />
@@ -208,6 +343,9 @@ function LockedTreePopup({ treeId, coords }) {
             {distanceInMeters !== null && !isNearby && (
                 <p><Text tid="gameNeedCloser" /></p>
             )}
+            {exceedsMaxWalkingTime && (
+                <p><Text tid="nearestTreeTooFar" /></p>
+            )}
             {geoStatus === 'unsupported' && <p><Text tid="nearestTreeUnsupported" /></p>}
             {geoStatus === 'error' && <p><Text tid="nearestTreeError" /></p>}
         </div>
@@ -215,10 +353,49 @@ function LockedTreePopup({ treeId, coords }) {
 }
 
 function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
-    const { traceNextLockedTreeFrom, openSpeciesModal, dictionary, isTreeUnlocked, setModalContent, setDm } = useContext(PinContext);
+    const { traceNextLockedTreeFrom, openSpeciesModal, openOxygenInfoModal, dictionary, isTreeUnlocked, setModalContent, setDm, mapData } = useContext(PinContext);
     const [traceState, setTraceState] = useState('idle');
+    const [treeEnvironment, setTreeEnvironment] = useState({ status: 'idle', current: null });
     const speciesData = speciesDetails[treeData.name];
     const hasRemainingLockedTrees = listDate.some((year) => !isTreeUnlocked(year));
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        fetchLjubljanaCityInfo(userLanguage, controller.signal)
+            .then((data) => {
+                setTreeEnvironment({
+                    status: 'ready',
+                    current: data.current
+                });
+            })
+            .catch((error) => {
+                if (error.name === 'AbortError') {
+                    return;
+                }
+
+                setTreeEnvironment({ status: 'error', current: null });
+            });
+
+        return () => controller.abort();
+    }, [userLanguage]);
+
+    const oxygenEstimate = treeEnvironment.current
+        ? estimateTreeOxygenForWalk({
+            speciesId: treeData.name,
+            walkingTimeInMinutes: 60,
+            weatherCode: treeEnvironment.current.weatherCode,
+            temperature: treeEnvironment.current.temperature,
+            sunrise: treeEnvironment.current.sunrise,
+            sunset: treeEnvironment.current.sunset,
+            currentTime: treeEnvironment.current.time
+        })
+        : null;
+    const formattedOxygenPerHour = oxygenEstimate
+        ? new Intl.NumberFormat(userLanguage === 'sl' ? 'sl-SI' : userLanguage === 'fr' ? 'fr-FR' : 'en-GB', {
+            maximumFractionDigits: 0
+        }).format(Math.round(oxygenEstimate.gramsPerHour))
+        : null;
 
     const handleTraceNextTree = async () => {
         setTraceState('loading');
@@ -231,12 +408,35 @@ function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
         setDm(true);
     };
 
+    const handleOpenOxygenInfo = () => {
+        if (!treeEnvironment.current) {
+            return;
+        }
+
+        if (mapData.mapObj) {
+            mapData.mapObj.closePopup();
+        }
+
+        openOxygenInfoModal({
+            source: 'unlocked-popup',
+            speciesId: treeData.name,
+            year: treeId,
+            walkingTimeInMinutes: 60,
+            weatherCode: treeEnvironment.current.weatherCode,
+            temperature: treeEnvironment.current.temperature,
+            sunrise: treeEnvironment.current.sunrise,
+            sunset: treeEnvironment.current.sunset,
+            currentTime: treeEnvironment.current.time
+        });
+    };
+
     return (
         <>
             <span className="title">{treeId}</span>
             <div className="unlockedPopupBody">
                 <div className="popupField popupField--species">
                     <div className="popupFieldValue">
+                        <div className="popupSpeciesStack">
                         {speciesData ? (
                             <button
                                 type="button"
@@ -251,6 +451,18 @@ function UnlockedTreePopup({ treeId, treeData, userLanguage }) {
                         ) : (
                             <Text as="span" tid={treeData.name} />
                         )}
+                        {formattedOxygenPerHour && (
+                            <div className="popupOxygenInfoRow">
+                                <div className="popupOxygenTag">
+                                <span className="popupOxygenTag__icon"><OxygenIcon /></span>
+                                <span className="popupOxygenTag__value">ÃƒÂ¢Ã¢â‚¬Â°Ã†â€™ {formattedOxygenPerHour}g OÃƒÂ¢Ã¢â‚¬Å¡Ã¢â‚¬Å¡ / h</span>
+                                </div>
+                                <button type="button" className="oxygenInfoButton oxygenInfoButton--popup" onClick={handleOpenOxygenInfo}>
+                                    <Text tid="oxygenInfoAction" />
+                                </button>
+                            </div>
+                        )}
+                        </div>
                     </div>
                 </div>
                 <div className="popupField popupField--address">
@@ -329,7 +541,7 @@ function constructJsx(trees, map, markerRef, userLanguage, isTreeUnlocked, setYe
                         {unlocked ? (
                             <UnlockedTreePopup treeId={title} treeData={trees[tree]} userLanguage={userLanguage} />
                         ) : (
-                            <LockedTreePopup treeId={title} coords={trees[tree].coords} />
+                            <LockedTreePopup treeId={title} treeName={trees[tree].name} coords={trees[tree].coords} isMobileViewport={isMobileViewport} />
                         )}
 
                     </Popup>
@@ -503,9 +715,10 @@ function RecenterIcon() {
 }
 
 const InteractiveMap = () => {
-    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, setShowClouds, userPosition, routeToTree, dictionary, setPopupOpen, modalContent, requestedPopupTreeId, setRequestedPopupTreeId, popupOpen, locateNearestTree, hasUnlockedEveryTree, nearestTreeState, isFollowingUser, isFollowMapCentered, setIsFollowMapCentered, recenterFollowedUser } = useContext(PinContext);
+    const { dm, mapData, divWidth, setDivWidth, yearselected, setWarning, tmppins, userLanguage, showClouds, setShowClouds, userPosition, routeToTree, dictionary, setPopupOpen, modalContent, setModalContent, setDm, requestedPopupTreeId, setRequestedPopupTreeId, popupOpen, locateNearestTree, hasUnlockedEveryTree, nearestTreeState, isFollowingUser, isFollowMapCentered, setIsFollowMapCentered, recenterFollowedUser } = useContext(PinContext);
 
     const [divHeight, setDivHeight] = useState(0);
+    const [cityCurrent, setCityCurrent] = useState(null);
     const markerRef = useRef([]);
     const appRef = useRef(null);
 
@@ -565,6 +778,35 @@ const InteractiveMap = () => {
         return () => window.clearTimeout(timeoutId);
     }, [mapData.mapObj, divWidth, divHeight]);
 
+    useEffect(() => {
+        const controller = new AbortController();
+
+        async function loadCityTemperature() {
+            try {
+                const cityInfo = await fetchLjubljanaCityInfo(userLanguage, controller.signal);
+                setCityCurrent({
+                    temperature: cityInfo.current.temperature,
+                    weatherCode: cityInfo.current.weatherCode
+                });
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    setCityCurrent(null);
+                }
+            }
+        }
+
+        loadCityTemperature();
+
+        return () => controller.abort();
+    }, [userLanguage]);
+
+    const handleOpenLjubljanaInfo = () => {
+        setModalContent('cityInfo');
+        if (!dm) {
+            setDm(true);
+        }
+    };
+
     return (
         <div className="App">
             {(divWidth > 0 && showClouds) && <Cloud widthContainer={divWidth} heightContainer={divHeight} />}
@@ -576,6 +818,29 @@ const InteractiveMap = () => {
                     aria-label={showClouds ? 'Hide clouds' : 'Show clouds'}
                     title={showClouds ? 'Hide clouds' : 'Show clouds'}
                 />
+                <div className="mapCityInfoCluster">
+                    {cityCurrent?.temperature != null && (
+                        <button
+                            type="button"
+                            className="mapCityInfoTag"
+                            onClick={handleOpenLjubljanaInfo}
+                            aria-label={dictionary.cityInfoAction || 'Ljubljana weather and air quality'}
+                            title={dictionary.cityInfoAction || 'Ljubljana weather and air quality'}
+                        >
+                            {divWidth > MOBILE_BREAKPOINT_PX && cityCurrent.weatherCode != null ? <WeatherGlyph weatherCode={cityCurrent.weatherCode} /> : null}
+                            <span>{cityCurrent.temperature} {'\u00B0'}C</span>
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        className="mapCityInfoTag mapCityInfoTag--ellipsis"
+                        onClick={handleOpenLjubljanaInfo}
+                        aria-label={dictionary.cityInfoAction || 'Ljubljana weather and air quality'}
+                        title={dictionary.cityInfoAction || 'Ljubljana weather and air quality'}
+                    >
+                        ...
+                    </button>
+                </div>
                 {!dm && !popupOpen && hasUnlockedEveryTree && (
                     <button
                         type="button"
@@ -603,7 +868,7 @@ const InteractiveMap = () => {
                 )}
 
                 {dm === true &&
-                    <div className={`modal${modalContent === 'intro' ? ' modal--intro' : ''}${modalContent === 'about' ? ' modal--about' : ''}${modalContent === 'tooFar' ? ' modal--compact' : ''}${modalContent === 'treeUnlocked' ? ' modal--unlock' : ''}${modalContent === 'gameVictory' ? ' modal--victory' : ''}${modalContent === 'species' ? ' modal--species' : ''}${modalContent === 'treasure' ? ' modal--treasure' : ''}`}>
+                    <div className={`modal${modalContent === 'intro' ? ' modal--intro' : ''}${modalContent === 'about' ? ' modal--about' : ''}${modalContent === 'oxygenInfo' ? ' modal--oxygenInfo' : ''}${modalContent === 'tooFar' || modalContent === 'cityInfo' ? ' modal--compact' : ''}${modalContent === 'treeUnlocked' ? ' modal--unlock' : ''}${modalContent === 'gameVictory' ? ' modal--victory' : ''}${modalContent === 'species' ? ' modal--species' : ''}${modalContent === 'treasure' ? ' modal--treasure' : ''}`}>
                         <Modalcontent />
                     </div>
                 }
@@ -657,3 +922,6 @@ const InteractiveMap = () => {
 };
 
 export default InteractiveMap;
+
+
+

@@ -85,7 +85,7 @@
     color: #14391f;
 }
 
-.leaflet-popup-content .gamePopup > :not(.title) {
+.leaflet-popup-content .gamePopup > :not(.title):not(.gamePopupContextBand) {
     margin-left: 22px;
     margin-right: 18px;
 }
@@ -136,6 +136,65 @@
     font-size: 1.7rem;
     line-height: 1.35;
     font-weight: 700;
+}
+
+.leaflet-popup-content .popupSpeciesStack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
+}
+
+.leaflet-popup-content .popupOxygenTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(23, 128, 64, 0.1);
+    border: 1px solid rgba(23, 128, 64, 0.16);
+    color: #1f6133;
+}
+
+.leaflet-popup-content .popupOxygenTag__icon {
+    display: inline-flex;
+    width: 1.7rem;
+    height: 1.7rem;
+    align-items: center;
+    justify-content: center;
+    color: #178040;
+}
+
+.leaflet-popup-content .popupOxygenTag__icon svg {
+    width: 1.7rem;
+    height: 1.7rem;
+    display: block;
+}
+
+.leaflet-popup-content .popupOxygenTag__icon svg path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.leaflet-popup-content .popupOxygenTag__icon .oxygenIcon path {
+    fill: currentColor;
+    stroke: none;
+}
+
+.leaflet-popup-content .popupOxygenTag__value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.leaflet-popup-content .popupOxygenInfoRow {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
 }
 
 .leaflet-popup-content .popupField--address {
@@ -244,7 +303,7 @@
         padding: 18px 18px 16px;
     }
 
-    .leaflet-popup-content .gamePopup > :not(.title) {
+    .leaflet-popup-content .gamePopup > :not(.title):not(.gamePopupContextBand) {
         margin-left: 18px;
         margin-right: 18px;
     }

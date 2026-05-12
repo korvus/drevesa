@@ -7,8 +7,10 @@ export const PinContext = createContext(null);
 
 const LANGUAGE_FALLBACK = 'fr';
 const GAME_STORAGE_KEY = 'drevesa-passport-v1';
-const TOTAL_TREE_COUNT = Object.keys(trees).length;
-const ALL_TREE_COORDS = Object.values(trees).flatMap((entries) => entries.map((entry) => entry.coords));
+const EXCLUDED_TREE_YEARS = new Set(['2023']);
+const ACTIVE_TREE_YEARS = Object.keys(trees).filter((year) => !EXCLUDED_TREE_YEARS.has(year));
+const TOTAL_TREE_COUNT = ACTIVE_TREE_YEARS.length;
+const ALL_TREE_COORDS = ACTIVE_TREE_YEARS.flatMap((year) => trees[year].map((entry) => entry.coords));
 const LANGUAGE_ALIASES = {
     si: 'sl'
 };
@@ -21,8 +23,9 @@ const FOLLOW_ROUTE_RECALC_INTERVAL_MS = 20000;
 const FOLLOW_ROUTE_MIN_MOVE_METERS = 15;
 const FOLLOW_ROUTE_DEVIATION_THRESHOLD_METERS = 30;
 const FOLLOW_AUTO_UNLOCK_DISTANCE_METERS = 20;
-const MOBILE_NEAREST_TREE_OFFSET_RATIO = 0.22;
-const MOBILE_NEAREST_TREE_MAX_OFFSET_PX = 140;
+const MOBILE_NEAREST_TREE_OFFSET_RATIO = 0.34;
+const MOBILE_NEAREST_TREE_MAX_OFFSET_PX = 260;
+const MOBILE_NEAREST_TREE_HORIZONTAL_OFFSET_PX = 18;
 
 function haversineDistanceInKm(fromCoords, toCoords) {
     const toRadians = (degrees) => (degrees * Math.PI) / 180;
@@ -218,21 +221,22 @@ function getNearestTreeVerticalOffset(map) {
 
 function flyToNearestTree(map, coords) {
     const verticalOffset = getNearestTreeVerticalOffset(map);
+    const horizontalOffset = verticalOffset > 0 ? MOBILE_NEAREST_TREE_HORIZONTAL_OFFSET_PX : 0;
 
-    if (verticalOffset === 0) {
+    if (verticalOffset === 0 && horizontalOffset === 0) {
         map.flyTo(coords, NEAREST_TREE_ZOOM);
         return;
     }
 
     const targetPoint = map.project(coords, NEAREST_TREE_ZOOM);
-    const centerPoint = targetPoint.subtract([0, verticalOffset]);
+    const centerPoint = targetPoint.subtract([horizontalOffset, verticalOffset]);
     map.flyTo(map.unproject(centerPoint, NEAREST_TREE_ZOOM), NEAREST_TREE_ZOOM);
 }
 
 function findNearestTree(userCoords) {
     let nearest = null;
 
-    Object.keys(trees).forEach((year) => {
+    ACTIVE_TREE_YEARS.forEach((year) => {
         trees[year].forEach((entry, index) => {
             const directDistanceInKm = haversineDistanceInKm(userCoords, entry.coords);
 
@@ -262,7 +266,7 @@ function findNearestTree(userCoords) {
 function findNearestLockedTree(fromCoords, isTreeUnlocked) {
     let nearest = null;
 
-    Object.keys(trees).forEach((year) => {
+    ACTIVE_TREE_YEARS.forEach((year) => {
         if (isTreeUnlocked(year)) {
             return;
         }
@@ -330,7 +334,9 @@ function readGameState() {
 
         const parsedValue = JSON.parse(rawValue);
         return {
-            unlockedTrees: Array.isArray(parsedValue.unlockedTrees) ? parsedValue.unlockedTrees : [],
+            unlockedTrees: Array.isArray(parsedValue.unlockedTrees)
+                ? parsedValue.unlockedTrees.filter((year) => ACTIVE_TREE_YEARS.includes(year))
+                : [],
             unlockAllTrees: Boolean(parsedValue.unlockAllTrees)
         };
     } catch (error) {
@@ -391,6 +397,7 @@ export const PinContextProvider = props => {
     const [celebrationKey, setCelebrationKey] = useState(0);
     const [recentlyUnlockedTreeId, setRecentlyUnlockedTreeId] = useState('');
     const [selectedSpeciesId, setSelectedSpeciesId] = useState('');
+    const [oxygenInfoContext, setOxygenInfoContext] = useState(null);
     const [guidedTreeId, setGuidedTreeId] = useState('');
     const [isFollowingUser, setIsFollowingUser] = useState(false);
     const [isFollowMapCentered, setIsFollowMapCentered] = useState(true);
@@ -490,6 +497,15 @@ export const PinContextProvider = props => {
         try {
             const route = await fetchWalkingRoute(nextPosition, target.coords);
             if (followRouteTargetRef.current !== target) {
+                return;
+            }
+            if (route.durationInMinutes > MAX_WALKING_TIME_MINUTES) {
+                setIsFollowingUser(false);
+                setRouteToTree([]);
+                setRouteMeta(null);
+                setGuidedTreeId('');
+                setModalContent('tooFar');
+                setDm(true);
                 return;
             }
 
@@ -678,6 +694,20 @@ export const PinContextProvider = props => {
             ? { year: nextTreeSuggestionRef.current.year, coords: nextTreeSuggestionRef.current.coords }
             : null;
         const followTarget = target || nearestTarget || nextSuggestionTarget;
+        const knownWalkingMinutes = followTarget
+            ? nearestTreeRef.current?.year === followTarget.year
+                ? nearestTreeRef.current?.walkingTimeInMinutes
+                : nextTreeSuggestionRef.current?.year === followTarget.year
+                    ? nextTreeSuggestionRef.current?.walkingTimeInMinutes
+                    : null
+            : null;
+
+        if (knownWalkingMinutes != null && knownWalkingMinutes > MAX_WALKING_TIME_MINUTES) {
+            setModalContent('tooFar');
+            setDm(true);
+            setIsFollowingUser(false);
+            return;
+        }
         const hasExistingRouteToTarget = Boolean(
             followTarget &&
             routeToTreeRef.current.length > 1 &&
@@ -819,7 +849,8 @@ export const PinContextProvider = props => {
             }
 
             const nextUnlockedTrees = [...currentUnlockedTrees, treeId];
-            const hasUnlockedEveryTree = nextUnlockedTrees.length >= TOTAL_TREE_COUNT;
+            const activeUnlockedCount = nextUnlockedTrees.filter((year) => ACTIVE_TREE_YEARS.includes(year)).length;
+            const hasUnlockedEveryTree = activeUnlockedCount >= TOTAL_TREE_COUNT;
             persistGameState({ unlockedTrees: nextUnlockedTrees, unlockAllTrees });
             setRecentlyUnlockedTreeId(treeId);
             setGuidedTreeId('');
@@ -848,7 +879,8 @@ export const PinContextProvider = props => {
     };
 
     const isTreeUnlocked = (treeId) => unlockAllTrees || unlockedTrees.includes(treeId);
-    const hasUnlockedEveryTree = unlockAllTrees || unlockedTrees.length >= TOTAL_TREE_COUNT;
+    const activeUnlockedCount = unlockedTrees.filter((year) => ACTIVE_TREE_YEARS.includes(year)).length;
+    const hasUnlockedEveryTree = unlockAllTrees || activeUnlockedCount >= TOTAL_TREE_COUNT;
 
     const openSpeciesModal = useCallback((speciesId) => {
         if (!speciesId) {
@@ -857,6 +889,16 @@ export const PinContextProvider = props => {
 
         setSelectedSpeciesId(speciesId);
         setModalContent('species');
+        setDm(true);
+    }, []);
+
+    const openOxygenInfoModal = useCallback((context) => {
+        if (!context) {
+            return;
+        }
+
+        setOxygenInfoContext(context);
+        setModalContent('oxygenInfo');
         setDm(true);
     }, []);
 
@@ -891,6 +933,20 @@ export const PinContextProvider = props => {
 
         try {
             const route = await fetchWalkingRoute(currentPosition, nextTree.coords);
+            if (route.durationInMinutes > MAX_WALKING_TIME_MINUTES) {
+                setNextTreeSuggestion(null);
+                setRouteToTree([]);
+                setRouteMeta(null);
+                setYearselected(0);
+                setRequestedPopupTreeId('');
+                setGuidedTreeId('');
+                setModalContent('tooFar');
+                setDm(true);
+                if (mapObj) {
+                    mapObj.flyTo(currentPosition, 14);
+                }
+                return null;
+            }
             setUserPosition(route.snappedStart);
             setRouteToTree(route.coordinates);
             setRouteMeta({
@@ -1072,6 +1128,7 @@ export const PinContextProvider = props => {
         celebrationKey,
         recentlyUnlockedTreeId, setRecentlyUnlockedTreeId,
         selectedSpeciesId, setSelectedSpeciesId,
+        oxygenInfoContext, setOxygenInfoContext,
         unlockedTrees, setUnlockedTrees,
         unlockAllTrees,
         hasUnlockedEveryTree,
@@ -1086,6 +1143,7 @@ export const PinContextProvider = props => {
         showClouds, setShowClouds,
         modalContent, setModalContent,
         openSpeciesModal,
+        openOxygenInfoModal,
         yearselected, setYearselected,
         dictionary: dictionaryList[activeLanguage],
         userLanguageChange: selected => {
@@ -1153,7 +1211,3 @@ export function FuncText(tid) {
     let str = dictionaryList[lang][tid] ? dictionaryList[lang][tid] : "";
     return str;
 };
-
-
-
-

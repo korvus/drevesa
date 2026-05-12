@@ -6,7 +6,8 @@ import { PinContext, Text } from '../store';
 const InteractiveMap = lazy(() => import('./interactiveMap.js'));
 
 const IS_PRERENDER = typeof navigator !== 'undefined' && navigator.userAgent === 'ReactSnap';
-const listDate = Object.keys(coords);
+const EXCLUDED_TREE_YEARS = new Set(['2023']);
+const listDate = Object.keys(coords).filter((year) => !EXCLUDED_TREE_YEARS.has(year));
 
 const STATIC_COPY = {
     fr: {
