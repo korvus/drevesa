@@ -1143,6 +1143,38 @@ a {
   color: #245233;
 }
 
+.metaBrowserNotice {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.metaBrowserNotice__lead,
+.metaBrowserNotice__body {
+  margin: 0;
+}
+
+.metaBrowserNotice__lead {
+  font-weight: 700;
+}
+
+.metaBrowserNotice__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 0.95rem 1.4rem;
+  border-radius: 999px;
+  background: rgba(36, 82, 51, 0.12);
+  color: #245233;
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.metaBrowserNotice__cta--popup {
+  margin-top: 0.2rem;
+}
+
 .nearestTreeFeedback--floating {
   display: none;
 }
@@ -2356,6 +2388,10 @@ a {
   font-size: 1.4rem;
   line-height: 1.4;
   text-wrap: pretty;
+}
+
+.metaBrowserNotice--popup {
+  margin-top: 1rem;
 }
 
 .gamePopupMetrics {

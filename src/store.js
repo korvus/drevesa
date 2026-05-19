@@ -2,6 +2,7 @@ import React, { useState, createContext, useRef, useContext, useEffect, useCallb
 import { languageOptions, dictionaryList } from './datas/languages.js';
 import ReactStringReplace from 'react-string-replace';
 import trees from './datas/datas.json';
+import { getInAppBrowserInfo } from './utils/inAppBrowser.js';
 
 export const PinContext = createContext(null);
 
@@ -382,6 +383,7 @@ export const PinContextProvider = props => {
     const [tmppins, setTmppins] = useState(0);
     const [showClouds, setShowClouds] = useState(false);
     const [userLanguage, setUserLanguage] = useState(getCurrentLanguage);
+    const [inAppBrowser] = useState(getInAppBrowserInfo);
     const [divWidth, setDivWidth] = useState(0);
     const [userPosition, setUserPosition] = useState(null);
     const [routeToTree, setRouteToTree] = useState([]);
@@ -683,7 +685,7 @@ export const PinContextProvider = props => {
 
     const startFollowingUser = useCallback((target = null) => {
         if (typeof navigator === 'undefined' || !navigator.geolocation) {
-            setNearestTreeState('unsupported');
+            setNearestTreeState(inAppBrowser.isMetaInAppBrowser ? 'meta-browser' : 'unsupported');
             return;
         }
 
@@ -751,7 +753,7 @@ export const PinContextProvider = props => {
         if (userPosition && followTarget) {
             maybeRefreshFollowRoute(userPosition);
         }
-    }, [mapObj, maybeRefreshFollowRoute, setFollowMapCentered, userPosition]);
+    }, [inAppBrowser.isMetaInAppBrowser, mapObj, maybeRefreshFollowRoute, setFollowMapCentered, userPosition]);
 
     const recenterFollowedUser = useCallback(() => {
         setFollowMapCentered(true);
@@ -1070,7 +1072,7 @@ export const PinContextProvider = props => {
             }
 
             setNearestTree(null);
-            setNearestTreeState('unsupported');
+            setNearestTreeState(inAppBrowser.isMetaInAppBrowser ? 'meta-browser' : 'unsupported');
             setRouteToTree([]);
             setRouteMeta(null);
             setYearselected(0);
@@ -1098,11 +1100,11 @@ export const PinContextProvider = props => {
                 setGuidedTreeId('');
 
                 if (error.code === error.PERMISSION_DENIED) {
-                    setNearestTreeState('denied');
+                    setNearestTreeState(inAppBrowser.isMetaInAppBrowser ? 'meta-browser' : 'denied');
                     return;
                 }
 
-                setNearestTreeState('error');
+                setNearestTreeState(inAppBrowser.isMetaInAppBrowser ? 'meta-browser' : 'error');
             },
             {
                 enableHighAccuracy: true,
@@ -1110,7 +1112,7 @@ export const PinContextProvider = props => {
                 maximumAge: 300000
             }
         );
-    }, [mapObj, userPosition]);
+    }, [inAppBrowser.isMetaInAppBrowser, mapObj, userPosition]);
 
     const provider = {
         dm,
@@ -1154,6 +1156,7 @@ export const PinContextProvider = props => {
         divWidth, setDivWidth,
         showClouds, setShowClouds,
         modalContent, setModalContent,
+        inAppBrowser,
         openSpeciesModal,
         openOxygenInfoModal,
         yearselected, setYearselected,

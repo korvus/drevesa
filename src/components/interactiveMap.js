@@ -20,6 +20,7 @@ import treasure from '../img/treasure.png';
 import carteExplication from '../img/carteExplication.png';
 import { fetchLjubljanaCityInfo } from '../utils/ljubljanaCityInfo.js';
 import { estimateTreeOxygenForWalk } from '../utils/treeOxygenEstimate.js';
+import MetaInAppBrowserNotice from './metaInAppBrowserNotice.js';
 
 const Ljubljana = [46.0507666, 14.5047565];
 const EXCLUDED_TREE_YEARS = new Set(['2023']);
@@ -146,7 +147,7 @@ function haversineDistanceInMeters(fromCoords, toCoords) {
 }
 
 function LockedTreePopup({ treeId, treeName, coords, isMobileViewport = false }) {
-    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, nextTreeSuggestion, routeToTree, routeMeta, userLanguage, mapData, startFollowingUser, isFollowingUser, dictionary } = useContext(PinContext);
+    const { userPosition, setUserPosition, unlockTree, guidedTreeId, nearestTree, nextTreeSuggestion, routeToTree, routeMeta, userLanguage, mapData, startFollowingUser, isFollowingUser, dictionary, inAppBrowser } = useContext(PinContext);
     const [distanceInMeters, setDistanceInMeters] = useState(null);
     const [geoStatus, setGeoStatus] = useState('idle');
     const [treeEnvironment, setTreeEnvironment] = useState({ status: 'idle', current: null });
@@ -270,7 +271,7 @@ function LockedTreePopup({ treeId, treeName, coords, isMobileViewport = false })
                 maybeUpdatePosition(currentCoords);
             },
             () => {
-                setGeoStatus('error');
+                setGeoStatus(inAppBrowser.isMetaInAppBrowser ? 'meta-browser' : 'error');
             },
             {
                 enableHighAccuracy: true,
@@ -285,11 +286,11 @@ function LockedTreePopup({ treeId, treeName, coords, isMobileViewport = false })
                 watchIdRef.current = null;
             }
         };
-    }, [setUserPosition]);
+    }, [inAppBrowser.isMetaInAppBrowser, setUserPosition]);
 
     const handleGoThere = () => {
         if (!navigator.geolocation) {
-            setGeoStatus('unsupported');
+            setGeoStatus(inAppBrowser.isMetaInAppBrowser ? 'meta-browser' : 'unsupported');
             return;
         }
 
@@ -346,6 +347,7 @@ function LockedTreePopup({ treeId, treeName, coords, isMobileViewport = false })
             {exceedsMaxWalkingTime && (
                 <p><Text tid="nearestTreeTooFar" /></p>
             )}
+            {geoStatus === 'meta-browser' && <MetaInAppBrowserNotice className="metaBrowserNotice--popup" ctaClassName="metaBrowserNotice__cta metaBrowserNotice__cta--popup" />}
             {geoStatus === 'unsupported' && <p><Text tid="nearestTreeUnsupported" /></p>}
             {geoStatus === 'error' && <p><Text tid="nearestTreeError" /></p>}
         </div>
@@ -922,4 +924,3 @@ const InteractiveMap = () => {
 };
 
 export default InteractiveMap;
-

@@ -7,6 +7,7 @@ import coupe from '../img/coupe.png';
 import treasure from '../img/treasure.png';
 import { fetchLjubljanaCityInfo } from '../utils/ljubljanaCityInfo.js';
 import { estimateTreeOxygenForWalk } from '../utils/treeOxygenEstimate.js';
+import MetaInAppBrowserNotice from './metaInAppBrowserNotice.js';
 
 
 const EXCLUDED_TREE_YEARS = new Set(['2023']);
@@ -235,6 +236,14 @@ function renderNearestTreeSummary(nearestTree, nearestTreeLabel, dictionary, use
 }
 
 function renderNearestTreeFeedbackContent(nearestTreeState, nearestTree, nearestTreeSummary) {
+    if (nearestTreeState === 'meta-browser') {
+        return (
+            <div className="nearestTreeStatus">
+                <MetaInAppBrowserNotice />
+            </div>
+        );
+    }
+
     if (nearestTreeState === 'unsupported') {
         return (
             <p className="nearestTreeStatus">
