@@ -6,7 +6,7 @@ import { getInAppBrowserInfo } from './utils/inAppBrowser.js';
 
 export const PinContext = createContext(null);
 
-const LANGUAGE_FALLBACK = 'fr';
+const LANGUAGE_FALLBACK = 'en';
 const GAME_STORAGE_KEY = 'drevesa-passport-v1';
 const EXCLUDED_TREE_YEARS = new Set(['2023']);
 const ACTIVE_TREE_YEARS = Object.keys(trees).filter((year) => !EXCLUDED_TREE_YEARS.has(year));
