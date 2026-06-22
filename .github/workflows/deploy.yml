@@ -1,17 +1,17 @@
-name: Deploy React app to Hostinger
+name: Deploy to Hostinger
 
 on:
   push:
-    branches:
-      - main
+    branches: [main, dev]
   workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      CI: false
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: pnpm
 
       - name: Install Chromium dependencies for prerender (Puppeteer)
@@ -47,23 +47,52 @@ jobs:
             libgtk-3-0
 
       - name: Install dependencies and build
-        env:
-          CI: false
         run: |
           pnpm install --frozen-lockfile
           pnpm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: drevesa-build
-          path: dist/
+      # Cible selon la branche : main → prod (public) ; dev → staging (Basic Auth ajouté au .htaccess existant)
+      - name: Cible + verrou dev
+        run: |
+          if [ "${{ github.ref_name }}" = "dev" ]; then
+            echo "DEPLOY_TARGET=${{ vars.DEPLOY_DIR_DEV }}" >> "$GITHUB_ENV"
+            AUTHFILE="/home/u372623295${{ vars.DEPLOY_DIR_DEV }}.htpasswd"
+            printf '%s:%s\n' "${{ secrets.DEV_USER }}" "$(openssl passwd -apr1 '${{ secrets.DEV_PASS }}')" > dist/.htpasswd
+            # APPEND : préserve les RewriteRules (alias /si, pages localisées, fallback SPA) du .htaccess
+            printf '\n# --- Staging access lock ---\nAuthType Basic\nAuthName "Staging - acces restreint"\nAuthUserFile "%s"\nRequire valid-user\n' "$AUTHFILE" >> dist/.htaccess
+            echo "→ dev : Basic Auth ajouté au .htaccess existant"
+          else
+            echo "DEPLOY_TARGET=${{ vars.DEPLOY_DIR }}" >> "$GITHUB_ENV"
+            echo "→ prod : public"
+          fi
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: Deploy via FTPS (tentative 1)
+        id: deploy1
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          server:   ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: dist/
-          server-dir: /domains/200.work/public_html/drevesa/
+          protocol: ftps
+          port: 21
+          security: loose
+          local-dir: ./dist/
+          server-dir: ${{ env.DEPLOY_TARGET }}
+
+      - name: Pause avant retry
+        if: steps.deploy1.outcome == 'failure'
+        run: sleep 30
+
+      - name: Deploy via FTPS (retry)
+        if: steps.deploy1.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server:   ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          security: loose
+          local-dir: ./dist/
+          server-dir: ${{ env.DEPLOY_TARGET }}

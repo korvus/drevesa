@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <script>
-      if (navigator.userAgent !== 'ReactSnap') {
+      if (navigator.userAgent !== 'ReactSnap' && !location.hostname.startsWith('dev-')) {
         const gtagScript = document.createElement('script');
         gtagScript.async = true;
         gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-V6S1TYT56R';
