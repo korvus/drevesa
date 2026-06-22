@@ -35,9 +35,6 @@ importers:
       react-string-replace:
         specifier: ^1.1.0
         version: 1.1.1
-      web-vitals:
-        specifier: ^3.0.4
-        version: 3.5.2
     devDependencies:
       '@vitejs/plugin-react':
         specifier: ^6.0.2
@@ -1790,9 +1787,6 @@ packages:
 
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
-
-  web-vitals@3.5.2:
-    resolution: {integrity: sha512-c0rhqNcHXRkY/ogGDJQxZ9Im9D19hDihbzSQJrsioex+KnFgmMzBiy57Z1EjkhX/+OjyBpclDCzz2ITtjokFmg==}
 
   webdriver-bidi-protocol@0.4.2:
     resolution: {integrity: sha512-VSV+fzfChirL3e7jay2yUC7B4HQCGtEWEg/MSSQbK+qWbqeGlRLlXTzPpYr3XGUvbpDHumWZBJxgesg4N7dbtA==}
@@ -3804,8 +3798,6 @@ snapshots:
   walker@1.0.8:
     dependencies:
       makeerror: 1.0.12
-
-  web-vitals@3.5.2: {}
 
   webdriver-bidi-protocol@0.4.2: {}
 
