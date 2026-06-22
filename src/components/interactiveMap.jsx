@@ -8,8 +8,8 @@ import {
     CircleMarker,
     Polyline
 } from "react-leaflet";
-import Cloud from './cloud.js';
-import Modalcontent from './modal.js';
+import Cloud from './cloud.jsx';
+import Modalcontent from './modal.jsx';
 import coords from '../datas/datas.json';
 import { PinContext, Text } from '../store';
 import { useEffect, useRef, useContext, useState, useCallback } from "react";
@@ -20,7 +20,7 @@ import treasure from '../img/treasure.png';
 import carteExplication from '../img/carteExplication.png';
 import { fetchLjubljanaCityInfo } from '../utils/ljubljanaCityInfo.js';
 import { estimateTreeOxygenForWalk } from '../utils/treeOxygenEstimate.js';
-import MetaInAppBrowserNotice from './metaInAppBrowserNotice.js';
+import MetaInAppBrowserNotice from './metaInAppBrowserNotice.jsx';
 
 const Ljubljana = [46.0507666, 14.5047565];
 const EXCLUDED_TREE_YEARS = new Set(['2023']);

@@ -1,13 +1,13 @@
 import React, { useContext, useCallback, useState, useEffect } from "react";
 import trees from "../datas/datas.json";
 import { PinContext, Text } from "../store";
-import LanguageSelector from './languageSelector.js';
+import LanguageSelector from './languageSelector.jsx';
 import badge from '../img/badge.png';
 import coupe from '../img/coupe.png';
 import treasure from '../img/treasure.png';
 import { fetchLjubljanaCityInfo } from '../utils/ljubljanaCityInfo.js';
 import { estimateTreeOxygenForWalk } from '../utils/treeOxygenEstimate.js';
-import MetaInAppBrowserNotice from './metaInAppBrowserNotice.js';
+import MetaInAppBrowserNotice from './metaInAppBrowserNotice.jsx';
 
 
 const EXCLUDED_TREE_YEARS = new Set(['2023']);

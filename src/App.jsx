@@ -1,9 +1,9 @@
 import "leaflet/dist/leaflet.css";
 import './style/App.css';
 import './style/leaflet.css';
-import Col from './components/menu.js';
-import Map from './components/map.js';
-import TshirtPromo from './components/promo.js';
+import Col from './components/menu.jsx';
+import Map from './components/map.jsx';
+import TshirtPromo from './components/promo.jsx';
 import Seo from './components/seo.js';
 import { PinContext, PinContextProvider } from './store';
 import { useContext, useEffect, useMemo, useState } from 'react';

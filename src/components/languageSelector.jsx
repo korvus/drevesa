@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
 import { languageOptions } from '../datas/languages';
-import { PinContext } from '../store.js';
+import { PinContext } from '../store.jsx';
 
 export default function LanguageSelector() {
   const { userLanguage, userLanguageChange } = useContext(PinContext);

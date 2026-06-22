@@ -3,7 +3,7 @@ import coords from '../datas/datas.json';
 import speciesDetails from '../datas/speciesDetails.js';
 import { PinContext, Text } from '../store';
 
-const InteractiveMap = lazy(() => import('./interactiveMap.js'));
+const InteractiveMap = lazy(() => import('./interactiveMap.jsx'));
 
 const IS_PRERENDER = typeof navigator !== 'undefined' && navigator.userAgent === 'ReactSnap';
 const EXCLUDED_TREE_YEARS = new Set(['2023']);

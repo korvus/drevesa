@@ -1,0 +1,8 @@
+# pnpm >=11 bloque les build-scripts (postinstall) des deps sans décision explicite.
+# puppeteer (tiré par react-snap) : son postinstall télécharge le Chromium utilisé
+# pour le pré-rendu statique (npm run postbuild => react-snap) -> autorisé.
+# core-js / core-js-pure : leur postinstall n'est qu'un message de don -> inutile.
+allowBuilds:
+  core-js: false
+  core-js-pure: false
+  puppeteer: true
