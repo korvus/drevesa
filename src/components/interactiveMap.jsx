@@ -29,8 +29,23 @@ const GAME_DISTANCE_THRESHOLD_METERS = 20;
 const MAX_WALKING_TIME_MINUTES = 120;
 const MOBILE_BREAKPOINT_PX = 767;
 const MOBILE_POPUP_OFFSET = [0, 28];
-const MOBILE_POPUP_TOP_LEFT_PADDING = [12, 320];
-const MOBILE_POPUP_BOTTOM_RIGHT_PADDING = [12, 28];
+// autoPan : on aligne la popup vers le HAUT de l'écran (faible padding haut, juste
+// sous les contrôles) et on réserve assez de place en bas pour le menu qui recouvre
+// le bas de la carte — sinon le bas de la popup est tronqué (cf. Pixel, barre d'URL).
+const MOBILE_POPUP_TOP_PAD = 110;
+const MOBILE_POPUP_BOTTOM_PAD = 150;
+const MOBILE_POPUP_OFFSET_FALLBACK_VH = 800;
+const MOBILE_POPUP_TOP_LEFT_PADDING = [12, MOBILE_POPUP_TOP_PAD];
+const MOBILE_POPUP_BOTTOM_RIGHT_PADDING = [12, MOBILE_POPUP_BOTTOM_PAD];
+
+// Filet de sécurité : si la popup dépasse encore la place dispo (très petit viewport),
+// Leaflet la rend scrollable au lieu de la tronquer.
+function mobilePopupMaxHeight() {
+    const vh = typeof window !== 'undefined' && window.innerHeight
+        ? window.innerHeight
+        : MOBILE_POPUP_OFFSET_FALLBACK_VH;
+    return Math.max(240, vh - MOBILE_POPUP_TOP_PAD - MOBILE_POPUP_BOTTOM_PAD - 24);
+}
 
 function WeatherGlyph({ weatherCode }) {
     let icon = '\u2601';
@@ -518,7 +533,8 @@ function constructJsx(trees, map, markerRef, userLanguage, isTreeUnlocked, setYe
             const popupOptions = isMobileViewport ? {
                 offset: MOBILE_POPUP_OFFSET,
                 autoPanPaddingTopLeft: MOBILE_POPUP_TOP_LEFT_PADDING,
-                autoPanPaddingBottomRight: MOBILE_POPUP_BOTTOM_RIGHT_PADDING
+                autoPanPaddingBottomRight: MOBILE_POPUP_BOTTOM_RIGHT_PADDING,
+                maxHeight: mobilePopupMaxHeight()
             } : {};
 
             if (map.getBounds().contains(trees[tree].coords)) { shouldBeOneAtLeast++ };
