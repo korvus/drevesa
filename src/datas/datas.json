@@ -70,5 +70,17 @@
                 14.5003385
             ]
         }
+    ],
+    "2025": [
+        {
+            "name": "oak",
+            "adresse": "https://maps.apple.com/?ll=46.032550,14.500750&q=Drevo%20leta%202025",
+            "icon": "tree1",
+            "iconinactive": "tree1inactive",
+            "coords": [
+                46.03255,
+                14.50075
+            ]
+        }
     ]
 }

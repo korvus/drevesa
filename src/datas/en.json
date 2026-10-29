@@ -59,8 +59,10 @@
     "adrs2022": "6 Šlajmerjeva street",
     "adrs2023": "Aljaževa street",
     "adrs2024": "Valvasor Park (Tomšičeva street)",
+    "adrs2025": "Embankment between Barjanska Road, the Mali graben and Opekarska Street (Trnovo)",
     "Aljazeva ulica": "Aljaževa Street",
     "ginkgo": "[a href='https://www.rhs.org.uk/plants/7798/ginkgo-biloba/details']Ginkgo (Ginkgo biloba)[/a]",
+    "oak": "[a href='https://powo.science.kew.org/results?q=Quercus']Oak (Quercus sp.)[/a]",
     "tshirtBanner": "Like the trees, my creations grow from encounters and shared roots.",
     "seoTitle": "Drevesa - Ljubljana Tree of the Year Map",
     "seoDescription": "Interactive map of Ljubljana's citizen-elected Tree and Avenue of the Year since 2019, with stories, sources, and trilingual context.",
@@ -195,10 +197,12 @@
     "speciesLabel_Persian_ironwood": "Persian ironwood (Parrotia persica)",
     "speciesLabel_Japanese_cherries": "Japanese cherry (Prunus serrulata)",
     "speciesLabel_ginkgo": "Ginkgo biloba",
+    "speciesLabel_oak": "Oak (Quercus sp.)",
     "speciesInfo_sycamore": "The London plane is a [strong]very urban hybrid[/strong], planted in many European cities because it copes well with difficult street conditions. Its bark flakes away in pale patches, giving the trunk that almost camouflage-like appearance.[br][br]It also tolerates pruning, heat and pollution relatively well, which explains why it has become such a classic avenue tree.",
     "speciesInfo_weeping_beech": "The weeping beech is a dramatic cultivated form of the common beech: its branches fall like a [strong]vegetal curtain[/strong]. Standing beneath it can feel a bit like stepping into a living room made of leaves.[br][br]Because of that theatrical silhouette, it is often planted as a focal tree in parks and ornamental gardens.",
     "speciesInfo_Caucasian_wingnut": "The Caucasian wingnut likes fresh soils and places where water is never too far away. One of its signatures is the long hanging chains of winged fruits that appear later in the season.[br][br]It grows with a generous, spreading habit, and when it feels at home it quickly creates a [strong]deep, sheltering presence[/strong].",
     "speciesInfo_Persian_ironwood": "Persian ironwood is famous for its [strong]autumn colours[/strong], shifting from yellow to copper and deep red. Its extremely dense wood earned it the nickname ironwood.[br][br]As it ages, the bark breaks into irregular plates, adding even more graphic character to the tree.",
     "speciesInfo_Japanese_cherries": "Japanese cherries are loved for their spring blossom, abundant and fleeting at the same time. When they flower, an entire street can suddenly turn into a [strong]seasonal event[/strong] that people come out to enjoy.[br][br]Their beauty is tied to that brevity: the display lasts only a short time, which makes it all the more memorable.",
-    "speciesInfo_ginkgo": "Ginkgo is often described as a [strong]living fossil[/strong]: its lineage is ancient and has crossed immense spans of time. Its fan-shaped leaves, easy to recognise, glow bright yellow in autumn.[br][br]It is also known for its resilience in cities, which explains why it appears so often in botanical gardens, avenues and urban parks."
+    "speciesInfo_ginkgo": "Ginkgo is often described as a [strong]living fossil[/strong]: its lineage is ancient and has crossed immense spans of time. Its fan-shaped leaves, easy to recognise, glow bright yellow in autumn.[br][br]It is also known for its resilience in cities, which explains why it appears so often in botanical gardens, avenues and urban parks.",
+    "speciesInfo_oak": "The 2025 winner is identified by the City as an [strong]oak of the genus Quercus[/strong], without a more precise species identification. Growing without obstruction allowed it to develop an exceptionally broad, branching crown.[br][br]Standing on the Trnovo embankment, this monumental tree has become a natural landmark and a defining part of the neighbourhood’s identity."
 }

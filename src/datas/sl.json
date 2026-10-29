@@ -59,8 +59,10 @@
     "adrs2022": "Šlajmerjeva ulica 6",
     "adrs2023": "Aljaževa ulica",
     "adrs2024": "Valvasorjev park (Tomšičeva ulica)",
+    "adrs2025": "Nasip med Barjansko cesto, Malim grabnom in Opekarsko ulico (Trnovo)",
     "Aljazeva ulica": "Aljaževa ulica",
     "ginkgo": "[a href='https://www.arboretum.si/upcp_product/ginko-ginkgo-biloba/']Ginko (Ginkgo biloba)[/a]",
+    "oak": "[a href='https://powo.science.kew.org/results?q=Quercus']Hrast (Quercus sp.)[/a]",
     "tshirtBanner": "Tako kot drevesa tudi moje stvaritve rastejo iz srečanj in skupnih korenin.",
     "seoTitle": "Drevesa - zemljevid ljubljanskega drevesa oziroma drevoreda leta",
     "seoDescription": "Interaktivni zemljevid prikazuje drevesa in drevorede leta, za katere Ljubljančanke in Ljubljančani glasujejo od 2019, s pripovedmi, viri in prevodi.",
@@ -195,10 +197,12 @@
     "speciesLabel_Persian_ironwood": "Perzijska parocija (Parrotia persica)",
     "speciesLabel_Japanese_cherries": "Japonska češnja (Prunus serrulata)",
     "speciesLabel_ginkgo": "Ginko (Ginkgo biloba)",
+    "speciesLabel_oak": "Hrast (Quercus sp.)",
     "speciesInfo_sycamore": "Javorolistna platana je [strong]izrazito mestni hibrid[/strong], ki ga v številnih evropskih mestih sadijo zaradi njegove trpežnosti. Njeno lubje se lušči v svetlih lisah, zato deblo deluje skoraj kamuflažno.[br][br]Dobro prenaša obrezovanje, vročino in onesnaženje, zato je postala klasično drevo mestnih drevoredov.",
     "speciesInfo_weeping_beech": "Povešava bukev je posebna okrasna oblika navadne bukve: njene veje padajo kot [strong]rastlinska zavesa[/strong]. Ko stopite pod krošnjo, imate skoraj občutek, da vstopate v živo sobo iz listja.[br][br]Prav zaradi te gledališke silhuete jo pogosto sadijo kot poudarjeno drevo v parkih in vrtovih.",
     "speciesInfo_Caucasian_wingnut": "Kavkaški krilati oreškar ima rad sveža tla in kraje, kjer voda nikoli ni daleč. Prepoznaven je po dolgih visečih nizih krilatih plodov, ki se pojavijo pozneje v sezoni.[br][br]Raste široko in velikodušno; kadar mu okolje ustreza, hitro ustvari [strong]močno zavetno prisotnost[/strong].",
     "speciesInfo_Persian_ironwood": "Perzijska parocija slovi po svojih [strong]jesenskih barvah[/strong], ki prehajajo od rumene v bakreno in globoko rdečo. Zaradi zelo gostega lesa je dobila vzdevek ironwood oziroma železni les.[br][br]S starostjo njeno lubje razpoka v nepravilne plošče, kar drevesu doda še več grafičnega značaja.",
     "speciesInfo_Japanese_cherries": "Japonske češnje slovijo po spomladanskem cvetenju, ki je hkrati bujno in kratkotrajno. Ko zacvetijo, lahko cela ulica nenadoma postane [strong]sezonski dogodek[/strong], ki ljudi privabi na sprehod.[br][br]Njihova lepota je povezana prav s to kratkostjo: cvetovi trajajo le malo časa, zato ostanejo še bolj v spominu.",
-    "speciesInfo_ginkgo": "Ginko pogosto opisujejo kot [strong]živi fosil[/strong]: njegova razvojna linija je zelo stara in je preživela izjemno dolga obdobja. Njegovi pahljačasti listi se jeseni obarvajo v žareče rumeno.[br][br]Znan je tudi po svoji odpornosti v mestnem okolju, zato ga pogosto srečamo v botaničnih vrtovih, ob drevoredih in v parkih."
+    "speciesInfo_ginkgo": "Ginko pogosto opisujejo kot [strong]živi fosil[/strong]: njegova razvojna linija je zelo stara in je preživela izjemno dolga obdobja. Njegovi pahljačasti listi se jeseni obarvajo v žareče rumeno.[br][br]Znan je tudi po svoji odpornosti v mestnem okolju, zato ga pogosto srečamo v botaničnih vrtovih, ob drevoredih in v parkih.",
+    "speciesInfo_oak": "Mesto je zmagovalca leta 2025 opredelilo kot [strong]hrast iz rodu Quercus[/strong], brez natančnejše določitve vrste. Zaradi neovirane rasti je razvil izjemno široko in razvejano krošnjo.[br][br]Mogočno drevo na nasipu v Trnovem je postalo naravna znamenitost in pomemben del identitete tega prostora."
 }

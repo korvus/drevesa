@@ -54,7 +54,7 @@ const STATIC_COPY = {
     }
 };
 
-const LJUBLJANA_TREES_SOURCE_URL = 'https://www.ljubljana.si/sl/aktualno/novice/v-ljubljani-letos-izbiramo-drevored-leta';
+const LJUBLJANA_TREES_SOURCE_URL = 'https://www.ljubljana.si/sl/aktualno/novice/razglasili-smo-drevo-in-drevored-leta-2025';
 
 function StaticPrerenderContent() {
     const { dictionary, userLanguage } = useContext(PinContext);

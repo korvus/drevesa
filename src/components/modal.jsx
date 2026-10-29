@@ -15,8 +15,9 @@ import reward2021 from '../img/rewards/reward2021.png';
 import reward2022 from '../img/rewards/reward2022.png';
 import reward2023 from '../img/rewards/reward2023.png';
 import reward2024 from '../img/rewards/reward2024.png';
+import reward2025 from '../img/rewards/reward2025.png';
 
-const LJUBLJANA_TREES_SOURCE_URL = 'https://www.ljubljana.si/sl/aktualno/novice/v-ljubljani-letos-izbiramo-drevored-leta';
+const LJUBLJANA_TREES_SOURCE_URL = 'https://www.ljubljana.si/sl/aktualno/novice/razglasili-smo-drevo-in-drevored-leta-2025';
 const rewardImages = {
     2019: reward2019,
     2020: reward2020,
@@ -24,6 +25,7 @@ const rewardImages = {
     2022: reward2022,
     2023: reward2023,
     2024: reward2024,
+    2025: reward2025,
 };
 
 const TREE_LINED_YEAR_IDS = new Set(['2023']);

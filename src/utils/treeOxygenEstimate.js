@@ -28,6 +28,11 @@ const SPECIES_OXYGEN_PROFILES = {
     leafAreaHighM2: 720,
     photosynthesisStrength: 0.88,
     deciduous: true
+  },
+  oak: {
+    leafAreaHighM2: 1050,
+    photosynthesisStrength: 1.02,
+    deciduous: true
   }
 };
 

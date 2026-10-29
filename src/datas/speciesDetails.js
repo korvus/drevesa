@@ -346,6 +346,64 @@ const speciesDetails = {
       { labelTid: 'speciesModalLinkProfile', url: 'https://www.mnhn.fr/fr/ginkgo-biloba' },
       { labelTid: 'speciesModalLinkMore', url: 'https://en.wikipedia.org/wiki/Ginkgo_biloba' }
     ]
+  },
+  oak: {
+    nameTid: 'speciesLabel_oak',
+    anecdoteTid: 'speciesInfo_oak',
+    facts: [
+      {
+        labelTid: 'speciesFactLongevity',
+        value: {
+          fr: 'Souvent plusieurs siècles selon l’espèce et les conditions',
+          en: 'Often several centuries, depending on species and conditions',
+          sl: 'Pogosto več stoletij, odvisno od vrste in razmer'
+        }
+      },
+      {
+        labelTid: 'speciesFactOrigin',
+        value: {
+          fr: 'Genre largement réparti dans l’hémisphère Nord',
+          en: 'A genus widely distributed across the Northern Hemisphere',
+          sl: 'Rod je široko razširjen po severni polobli'
+        }
+      },
+      {
+        labelTid: 'speciesFactRange',
+        value: {
+          fr: 'Forêts, lisières, campagnes et parcs des régions tempérées',
+          en: 'Woodlands, forest edges, countryside and parks in temperate regions',
+          sl: 'Gozdovi, gozdni robovi, podeželje in parki zmernega pasu'
+        }
+      },
+      {
+        labelTid: 'speciesFactEtymology',
+        value: {
+          fr: 'Quercus est le nom latin du chêne',
+          en: 'Quercus is the Latin name for oak',
+          sl: 'Quercus je latinsko ime za hrast'
+        }
+      },
+      {
+        labelTid: 'speciesFactEdibility',
+        value: {
+          fr: 'Les glands sont riches en tanins et nécessitent une préparation adaptée avant consommation',
+          en: 'Acorns are rich in tannins and require suitable preparation before eating',
+          sl: 'Želod vsebuje veliko taninov in ga je treba pred uživanjem ustrezno pripraviti'
+        }
+      },
+      {
+        labelTid: 'speciesFactConservation',
+        value: {
+          fr: 'Le statut varie selon l’espèce ; l’identification officielle s’arrête ici au genre Quercus',
+          en: 'Status varies by species; the official identification here stops at the genus Quercus',
+          sl: 'Status je odvisen od vrste; uradna določitev tega drevesa se konča pri rodu Quercus'
+        }
+      }
+    ],
+    links: [
+      { labelTid: 'speciesModalLinkProfile', url: 'https://powo.science.kew.org/results?q=Quercus' },
+      { labelTid: 'speciesModalLinkMore', url: 'https://www.ljubljana.si/sl/aktualno/novice/razglasili-smo-drevo-in-drevored-leta-2025' }
+    ]
   }
 };
 
